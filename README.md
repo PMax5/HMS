@@ -1,2 +1,2 @@
-# HMPT
-Healthcare Monitoring for Public Transportation
+# HMS
+Healthcare Monitoring System
