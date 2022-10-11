@@ -1,0 +1,21 @@
+//
+// Protocol buffers definition for the Configuration Service.
+//
+
+syntax = "proto3";
+package hms.config.proto;
+
+message SubmitConfigRequest {
+    string service_id = 1;
+    string service_config = 2;
+}
+
+message SubmitConfigResponse {}
+
+message GetConfigRequest {
+    string service_id = 1;
+}
+
+message SubmitConfigResponse {
+    string service_config = 1;
+}
