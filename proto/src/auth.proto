@@ -34,4 +34,6 @@ message AuthorizationRequest {
     string service_token = 2;
 }
 
-message AuthorizationResponse {}
+message AuthorizationResponse {
+    ROLE role = 2;
+}
