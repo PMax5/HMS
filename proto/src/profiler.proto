@@ -1,0 +1,21 @@
+//
+// Protocol buffers definition for the Authentication Service.
+//
+
+syntax = "proto3";
+package hms.profiler.proto;
+
+message Profile {
+    string name = 1;
+    repeated int32 suitable_routes = 2;
+
+}
+
+message ProfileRequest {
+    string username = 1;
+    string service_token = 2;
+}
+
+message ProfileResponse {
+    Profile profile = 1;
+}
