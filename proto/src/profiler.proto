@@ -19,16 +19,19 @@ enum VEHICLE_TYPE {
 message Route {
     int32 id = 1;
     repeated VEHICLE_TYPE vehicles = 2;
+    optional int32 average_bpm = 3;
+    optional int32 average_drowsiness = 4;
+
 }
 
 message Profile {
     string name = 1;
     string username = 2;
     int32 age = 3;
-    int32 weight = 4;
-    int32 height = 5;
-    GENDER gender = 6;
-    repeated Route routes = 7;
+    GENDER gender = 4;
+    repeated Route routes = 5;
+    optional int32 weight = 6;
+    optional int32 height = 7;
 }
 
 message ProfileRequest {
