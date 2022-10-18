@@ -1,0 +1,17 @@
+//
+// Protocol buffers definition for the API Gateways Service.
+//
+
+syntax = "proto3";
+package hms.gateways.proto;
+
+// Profiles
+message GetProfileRequest {
+    string username = 1;
+    string auth_token = 2;
+}
+
+message GetProfileResponse {
+    hms.profiler.proto.Profile profile = 1;
+}
+
