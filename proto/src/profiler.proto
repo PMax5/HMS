@@ -5,6 +5,8 @@
 syntax = "proto3";
 package hms.profiler.proto;
 
+// Enums
+
 enum GENDER {
     MASCULINE = 0;
     FEMININE = 1;
@@ -16,23 +18,43 @@ enum VEHICLE_TYPE {
     LARGE = 2;
 }
 
-message Route {
-    int32 id = 1;
-    repeated VEHICLE_TYPE vehicles = 2;
-    optional int32 average_bpm = 3;
-    optional int32 average_drowsiness = 4;
+// Types
 
+message Vehicle {
+    int32 id = 1;
+    VEHICLE_TYPE type = 2;
+}
+
+message Interval {
+    int32 min = 1;
+    int32 max = 2;
 }
 
 message Profile {
+    Interval ageRange = 1;
+    GENDER gender = 2;
+    optional Interval bpmRange = 3;
+    optional Interval drowsinessRange = 4;
+    optional Interval shiftHoursRange = 5;
+}
+
+message Route {
+    int32 id = 1;
+    repeated Vehicle vehicles = 2;
+    repeated Profile profiles = 3;
+}
+
+message UserData {
     string name = 1;
     string username = 2;
     int32 age = 3;
     GENDER gender = 4;
-    repeated Route routes = 5;
+    optional repeated Route routes = 5;
     optional int32 weight = 6;
     optional int32 height = 7;
 }
+
+// Requests/Responses
 
 message ProfileRequest {
     string username = 1;
