@@ -31,7 +31,6 @@ message AuthenticationResponse {
 
 message AuthorizationRequest {
     string token = 1;
-    string service_token = 2;
 }
 
 message AuthorizationResponse {
