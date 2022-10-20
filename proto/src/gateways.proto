@@ -3,15 +3,27 @@
 //
 
 syntax = "proto3";
+
+import "auth.proto";
+import "profiler.proto";
 package hms.gateways.proto;
 
 // Profiles
-message GetProfileRequest {
-    string username = 1;
+message GetUserDataRequest {
+    UserDataRequest request = 1;
     string auth_token = 2;
 }
 
-message GetProfileResponse {
-    hms.profiler.proto.Profile profile = 1;
+message GetUserDataResponse {
+    UserDataResponse response = 1;
 }
 
+// Authentication
+message RegisterUserRequest {
+    RegistrationRequest request = 1;
+    string service_token = 2;
+}
+
+message RegisterUserResponse {
+    RegistrationResponse response = 1;
+}

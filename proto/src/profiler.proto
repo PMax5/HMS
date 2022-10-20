@@ -56,11 +56,10 @@ message UserData {
 
 // Requests/Responses
 
-message ProfileRequest {
+message UserDataRequest {
     string username = 1;
-    string service_token = 2;
 }
 
-message ProfileResponse {
-    Profile profile = 1;
+message UserDataResponse {
+    UserData userData = 1;
 }
