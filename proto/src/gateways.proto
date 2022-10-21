@@ -11,7 +11,7 @@ package hms.gateways.proto;
 // Profiles
 message GetUserDataRequest {
     UserDataRequest request = 1;
-    string auth_token = 2;
+    string authToken = 2;
 }
 
 message GetUserDataResponse {
@@ -21,7 +21,7 @@ message GetUserDataResponse {
 // Authentication
 message RegisterUserRequest {
     RegistrationRequest request = 1;
-    string service_token = 2;
+    string serviceToken = 2;
 }
 
 message RegisterUserResponse {
