@@ -51,4 +51,6 @@ message ServiceAuthenticationRequest {
     string serviceToken;
 }
 
-message ServiceAuthenticationResponse {}
+message ServiceAuthenticationResponse {
+    string serviceId = 1;
+}
