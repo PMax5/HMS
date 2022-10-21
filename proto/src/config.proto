@@ -6,16 +6,16 @@ syntax = "proto3";
 package hms.config.proto;
 
 message SubmitConfigRequest {
-    string service_id = 1;
-    string service_config = 2;
+    string serviceId = 1;
+    string serviceConfig = 2;
 }
 
 message SubmitConfigResponse {}
 
 message GetConfigRequest {
-    string service_id = 1;
+    string serviceId = 1;
 }
 
 message SubmitConfigResponse {
-    string service_config = 1;
+    string serviceConfig = 1;
 }
