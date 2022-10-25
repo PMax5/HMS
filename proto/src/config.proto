@@ -16,6 +16,6 @@ message GetConfigRequest {
     string serviceId = 1;
 }
 
-message SubmitConfigResponse {
+message GetConfigResponse {
     string serviceConfig = 1;
 }
