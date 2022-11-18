@@ -1,0 +1,56 @@
+//
+// Protocol buffers definition for the Authentication Service.
+//
+
+syntax = "proto3";
+package auth;
+
+// User
+enum ROLE {
+    DRIVER = 0;
+    SUPERVISOR = 1;
+    HEALTH_STAFF = 2;
+}
+
+message UserRegistrationRequest {
+    ROLE role = 1;
+    string name = 2;
+    string username = 3;
+    string password = 4;
+}
+
+message UserRegistrationResponse {}
+
+message UserAuthenticationRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message UserAuthenticationResponse {
+    string token = 1;
+}
+
+message UserAuthorizationRequest {
+    string token = 1;
+}
+
+message UserAuthorizationResponse {
+    ROLE role = 2;
+}
+
+// Services
+message ServiceRegistrationRequest {
+    string serviceId = 1;
+}
+
+message ServiceRegistrationResponse {
+    string serviceToken = 1;
+}
+
+message ServiceAuthenticationRequest {
+    string serviceToken = 1;
+}
+
+message ServiceAuthenticationResponse {
+    string serviceId = 1;
+}
