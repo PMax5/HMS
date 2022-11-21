@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  rabbitmq:
+    container_name: "rabbitmq"
+    image: rabbitmq:3.11.2-management
+    ports:
+      #AMQP Port
+      - "5672:5672"
+      #UI Port
+      - "8080:15672"
+    env_file:
+      - "environment.env"
+  mongodb:
+    container_name: "mongodb"
+    image: bitnami/mongodb
+    ports:
+      - "27017:27017"
+    env_file:
+      - "mongodb_environment.env"
