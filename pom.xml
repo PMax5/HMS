@@ -26,4 +26,12 @@
         <version.appassembler-maven-plugin>2.1.0</version.appassembler-maven-plugin>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>5.16.0</version>
+        </dependency>
+    </dependencies>
+
 </project>
