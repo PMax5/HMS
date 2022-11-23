@@ -12,6 +12,7 @@
         <module>config</module>
         <module>protos</module>
         <module>registry</module>
+        <module>rabbitmq</module>
     </modules>
 
     <properties>
