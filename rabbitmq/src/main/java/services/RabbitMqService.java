@@ -36,4 +36,8 @@ public class RabbitMqService {
 
         return connection.createChannel();
     }
+
+    public RabbitMqConfig getRabbitMqConfig() {
+        return rabbitMqConfig;
+    }
 }

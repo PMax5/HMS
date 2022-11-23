@@ -5,7 +5,7 @@
     <parent>
         <artifactId>HMS</artifactId>
         <groupId>hms</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,7 +15,7 @@
     <properties>
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
-        <mainClass>hms.ConfigApp</mainClass>
+        <mainClass>ConfigApp</mainClass>
         <port>8080</port>
     </properties>
 
@@ -23,7 +23,14 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>protos</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>rabbitmq</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
