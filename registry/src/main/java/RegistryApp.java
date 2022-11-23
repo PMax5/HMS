@@ -9,8 +9,6 @@ import java.util.concurrent.TimeoutException;
 
 public class RegistryApp {
     public static void main(String[] args) {
-        System.out.println("Hello World!");
-
         // Load RabbitMQ config
         ConfigService configService = new ConfigService();
         RabbitMqConfig rabbitMqConfig = configService.loadRabbitMqConfig();
@@ -28,7 +26,7 @@ public class RegistryApp {
             Channel channel = connection.createChannel();
 
             channel.queueDeclare().getQueue();
-            
+
 
         } catch (IOException | TimeoutException e) {
             // TODO: Create specific exceptions and logger.
