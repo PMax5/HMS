@@ -26,7 +26,10 @@ public class RabbitMqService {
         this.connectionFactory = new ConnectionFactory();
         this.connectionFactory.setUsername(this.rabbitMqConfig.getRabbitMqUserName());
         this.connectionFactory.setPassword(this.rabbitMqConfig.getRabbitMqPassword());
-        this.connectionFactory.setVirtualHost(this.rabbitMqConfig.getVirtualHost());
+
+        String virtualHost = this.rabbitMqConfig.getVirtualHost();
+        if (virtualHost != null && !virtualHost.equals(""))
+            this.connectionFactory.setVirtualHost(virtualHost);
         this.connectionFactory.setHost(this.rabbitMqConfig.getRabbitMqAddress());
         this.connectionFactory.setPort(Integer.parseInt(this.rabbitMqConfig.getRabbitMqPort()));
     }

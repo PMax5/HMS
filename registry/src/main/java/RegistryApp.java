@@ -27,7 +27,7 @@ public class RegistryApp {
                     .replyTo(replyQueueName)
                     .build();
 
-            channel.basicPublish("", "config_service", props, "TEST".getBytes(StandardCharsets.UTF_8));
+            channel.basicPublish("", "service_config", props, "TEST".getBytes(StandardCharsets.UTF_8));
 
             final CompletableFuture<String> response = new CompletableFuture<>();
 
