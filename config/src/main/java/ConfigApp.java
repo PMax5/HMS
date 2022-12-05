@@ -26,9 +26,9 @@ public class ConfigApp {
 
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
 
-            }
+            };
 
-            channel.basicConsume(configQueueName, false, );
+            channel.basicConsume(configQueueName, false, deliverCallback, (consumerTag -> {}));
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
         }
