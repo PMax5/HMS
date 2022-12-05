@@ -1,6 +1,8 @@
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
+import models.Operations;
+import models.RpcServer;
 import services.RabbitMqService;
 
 import java.io.IOException;
@@ -14,29 +16,15 @@ public class ConfigApp {
 
         try {
             final String configQueueName = rabbitMqService.getRabbitMqConfig().getConfigQueue();
-            Channel channel = rabbitMqService.createNewChannel();
-            channel.queueDeclare(configQueueName, true, false, true, null);
-            channel.queuePurge(configQueueName);
+            RpcServer configServer = rabbitMqService.newRpcServer(configQueueName);
+            Channel channel = configServer.getChannel();
 
             System.out.println("Initializing server...");
-            // TODO: Refactor this to include real code - add method to create RPCServer and RPCClient
-            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-                AMQP.BasicProperties replyProperties = new AMQP.BasicProperties
-                        .Builder()
-                        .correlationId(delivery.getProperties().getCorrelationId())
-                        .build();
-
-                String response = "Hello world!";
-
-                channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProperties, response.getBytes(StandardCharsets.UTF_8));
-                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-            };
-
-            channel.basicConsume(configQueueName, false, deliverCallback, (consumerTag -> {}));
+            configServer.addOperation(Operations.CONFIG_REQUEST, (consumerTag, delivery) -> {
+                configServer.sendResponseAndAck(delivery, "Hello".getBytes(StandardCharsets.UTF_8));
+            }, (consumerTag -> {}));
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
         }
-
-
     }
 }

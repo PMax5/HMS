@@ -59,9 +59,6 @@
                 </executions>
                 <configuration>
                     <mainClass>${mainClass}</mainClass>
-                    <arguments>
-                        <argument>${port}</argument>
-                    </arguments>
                 </configuration>
             </plugin>
             <plugin>

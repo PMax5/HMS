@@ -1,5 +1,5 @@
 package models;
 
-enum Operations {
+public enum Operations {
     CONFIG_REQUEST
 }

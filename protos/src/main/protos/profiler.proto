@@ -13,9 +13,8 @@ enum GENDER {
 }
 
 enum VEHICLE_TYPE {
-    SMALL = 0;
-    MEDIUM = 1;
-    LARGE = 2;
+    SHORT_DISTANCE = 1;
+    LONG_DISTANCE = 2;
 }
 
 // Types
@@ -33,9 +32,9 @@ message Interval {
 message Profile {
     Interval ageRange = 1;
     GENDER gender = 2;
-    optional Interval bpmRange = 3;
-    optional Interval drowsinessRange = 4;
-    optional Interval shiftHoursRange = 5;
+    Interval bpmRange = 3;
+    Interval drowsinessRange = 4;
+    Interval shiftHoursRange = 5;
 }
 
 message Route {
@@ -49,9 +48,10 @@ message UserData {
     string username = 2;
     int32 age = 3;
     GENDER gender = 4;
-    optional repeated Route routes = 5;
-    optional int32 weight = 6;
-    optional int32 height = 7;
+    Profile profile = 5;
+    repeated Route routes = 6;
+    int32 weight = 7;
+    int32 height = 8;
 }
 
 // Requests/Responses
