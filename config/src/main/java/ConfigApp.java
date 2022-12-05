@@ -22,7 +22,13 @@ public class ConfigApp {
             System.out.println("Initializing server...");
             configServer.addOperation(Operations.CONFIG_REQUEST, (consumerTag, delivery) -> {
                 configServer.sendResponseAndAck(delivery, "Hello".getBytes(StandardCharsets.UTF_8));
-            }, (consumerTag -> {}));
+            });
+
+            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+
+            }
+
+            channel.basicConsume(configQueueName, false, );
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
         }

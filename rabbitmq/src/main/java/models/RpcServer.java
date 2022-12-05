@@ -1,9 +1,11 @@
 package models;
 
-import com.rabbitmq.client.*;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DeliverCallback;
+import com.rabbitmq.client.Delivery;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -15,9 +17,8 @@ public class RpcServer extends com.rabbitmq.client.RpcServer {
         super(channel, queueName);
     }
 
-    public void addOperation(Operations operationId, DeliverCallback deliverCallback, CancelCallback cancelCallback) throws IOException {
+    public void addOperation(Operations operationId, DeliverCallback deliverCallback) throws IOException {
         this.operations.put(operationId, deliverCallback);
-        this.getChannel().basicConsume(this.getQueueName(), false, deliverCallback, cancelCallback);
     }
 
     public void sendResponseAndAck(Delivery delivery, byte[] responseBytes) throws IOException {

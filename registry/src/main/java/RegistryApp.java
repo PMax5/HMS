@@ -1,5 +1,7 @@
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.RpcClientParams;
+import models.RpcClient;
 import services.ConfigService;
 import services.RabbitMqService;
 
@@ -17,31 +19,10 @@ public class RegistryApp {
         RabbitMqService rabbitMqService = new RabbitMqService();
 
         try {
-
+            String configQueueName = rabbitMqService.getRabbitMqConfig().getConfigQueue();
+            RpcClient rpcClient = new RpcClient(null, configQueueName);
             Channel channel = rabbitMqService.createNewChannel();
-            final String corrId = UUID.randomUUID().toString();
-            String replyQueueName = channel.queueDeclare().getQueue();
-            AMQP.BasicProperties props = new AMQP.BasicProperties
-                    .Builder()
-                    .correlationId(corrId)
-                    .replyTo(replyQueueName)
-                    .build();
-
-            channel.basicPublish("", "service_config", props, "TEST".getBytes(StandardCharsets.UTF_8));
-
-            final CompletableFuture<String> response = new CompletableFuture<>();
-
-            String ctag = channel.basicConsume(replyQueueName, true, (consumerTag, delivery) -> {
-                if (delivery.getProperties().getCorrelationId().equals(corrId)) {
-                    response.complete(new String(delivery.getBody(), StandardCharsets.UTF_8));
-                }
-            }, consumerTag -> {
-            });
-
-            String result = response.get();
-            channel.basicCancel(ctag);
-
-            System.out.println(result);
+            final byte[] response = rpcClient.sendRequest(configQueueName, channel, "Hello".getBytes(StandardCharsets.UTF_8));
 
         } catch (IOException | TimeoutException | ExecutionException | InterruptedException e) {
             // TODO: Create specific exceptions and logger.
