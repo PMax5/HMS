@@ -10,8 +10,7 @@ public class RegistryApp {
     public static void main(String[] args) {
         // Load RabbitMQ config
         ConfigService configService = new ConfigService();
-        RabbitMqService rabbitMqService = new RabbitMqService();
-        RegistryService registryService = new RegistryService();
+        RegistryService registryService = new RegistryService(configService.loadConfig());
 
         try {
             registryService.loadServiceConfig();

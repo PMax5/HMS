@@ -29,12 +29,21 @@ public class RpcClient extends com.rabbitmq.client.RpcClient {
         channel.basicConsume(this.queueName, false, operationHandler, (consumerTag -> {}));
     }
 
-    public byte[] sendRequest(String configQueueName, Channel channel, byte[] requestBytes) throws IOException, ExecutionException, InterruptedException {
+    public byte[] sendRequest(String configQueueName,
+                              Channel channel,
+                              Operations operationType,
+                              byte[] requestBytes
+    ) throws IOException, ExecutionException, InterruptedException {
         final String corrId = UUID.randomUUID().toString();
         String replyQueueName = channel.queueDeclare().getQueue();
+
+        final Map<String, Object> headers = new TreeMap<>();
+        headers.put("operationType", operationType);
+
         AMQP.BasicProperties props = new AMQP.BasicProperties
                 .Builder()
                 .correlationId(corrId)
+                .headers(headers)
                 .replyTo(replyQueueName)
                 .build();
 
