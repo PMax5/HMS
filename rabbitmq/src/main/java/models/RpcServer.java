@@ -11,7 +11,7 @@ import java.util.TreeMap;
 
 public class RpcServer extends com.rabbitmq.client.RpcServer {
 
-    private Map<Operations, DeliverCallback> operations = new TreeMap<>();
+    private final Map<Operations, DeliverCallback> operations = new TreeMap<>();
 
     public RpcServer(Channel channel, String queueName) throws IOException {
         super(channel, queueName);
