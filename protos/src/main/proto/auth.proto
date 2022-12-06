@@ -3,7 +3,7 @@
 //
 
 syntax = "proto3";
-package auth;
+package hmsProto;
 
 // User
 enum ROLE {

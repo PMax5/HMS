@@ -3,7 +3,7 @@
 //
 
 syntax = "proto3";
-package config;
+package hmsProto;
 
 message SubmitConfigRequest {
     string serviceId = 1;

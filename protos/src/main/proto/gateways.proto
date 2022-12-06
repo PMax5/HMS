@@ -10,20 +10,20 @@ package gateways;
 
 // Profiles
 message GetUserDataRequest {
-    profiler.UserDataRequest request = 1;
+    hmsProto.UserDataRequest request = 1;
     string authToken = 2;
 }
 
 message GetUserDataResponse {
-    profiler.UserDataResponse response = 1;
+    hmsProto.UserDataResponse response = 1;
 }
 
 // Authentication
 message RegisterUserRequest {
-    auth.UserRegistrationRequest request = 1;
+    hmsProto.UserRegistrationRequest request = 1;
     string serviceToken = 2;
 }
 
 message RegisterUserResponse {
-    auth.UserRegistrationResponse response = 1;
+    hmsProto.UserRegistrationResponse response = 1;
 }
