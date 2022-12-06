@@ -4,8 +4,8 @@
 
 syntax = "proto3";
 
-import "src/main/protos/auth.proto";
-import "src/main/protos/profiler.proto";
+import "auth.proto";
+import "profiler.proto";
 package gateways;
 
 // Profiles
