@@ -4,26 +4,26 @@
 
 syntax = "proto3";
 
-import "auth.proto";
-import "profiler.proto";
+import "src/main/protos/auth.proto";
+import "src/main/protos/profiler.proto";
 package gateways;
 
 // Profiles
 message GetUserDataRequest {
-    UserDataRequest request = 1;
+    profiler.UserDataRequest request = 1;
     string authToken = 2;
 }
 
 message GetUserDataResponse {
-    UserDataResponse response = 1;
+    profiler.UserDataResponse response = 1;
 }
 
 // Authentication
 message RegisterUserRequest {
-    RegistrationRequest request = 1;
+    auth.UserRegistrationRequest request = 1;
     string serviceToken = 2;
 }
 
 message RegisterUserResponse {
-    RegistrationResponse response = 1;
+    auth.UserRegistrationResponse response = 1;
 }

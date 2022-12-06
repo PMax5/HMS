@@ -13,8 +13,8 @@ enum GENDER {
 }
 
 enum VEHICLE_TYPE {
-    SHORT_DISTANCE = 1;
-    LONG_DISTANCE = 2;
+    SHORT_DISTANCE = 0;
+    LONG_DISTANCE = 1;
 }
 
 // Types
