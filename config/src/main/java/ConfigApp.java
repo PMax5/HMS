@@ -1,4 +1,3 @@
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
 import models.Operations;
@@ -20,15 +19,15 @@ public class ConfigApp {
             Channel channel = configServer.getChannel();
 
             System.out.println("Initializing server...");
-            configServer.addOperation(Operations.CONFIG_REQUEST, (consumerTag, delivery) -> {
+            configServer.addOperationHandler(Operations.CONFIG_REQUEST, (consumerTag, delivery) -> {
                 configServer.sendResponseAndAck(delivery, "Hello".getBytes(StandardCharsets.UTF_8));
             });
 
-            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-
+            DeliverCallback mainHandler = (consumerTag, delivery) -> {
+                configServer.executeOperationHandler(delivery);
             };
 
-            channel.basicConsume(configQueueName, false, deliverCallback, (consumerTag -> {}));
+            channel.basicConsume(configQueueName, false, mainHandler, (consumerTag -> {}));
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
         }

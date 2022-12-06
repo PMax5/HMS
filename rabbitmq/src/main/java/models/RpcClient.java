@@ -6,7 +6,6 @@ import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.RpcClientParams;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -24,7 +23,7 @@ public class RpcClient extends com.rabbitmq.client.RpcClient {
         this.queueName = queueName;
     }
 
-    public void addOperation(Operations operationId, DeliverCallback deliverCallback) throws IOException {
+    public void addOperationReplyHandler(Operations operationId, DeliverCallback deliverCallback) throws IOException {
         this.operations.put(operationId, deliverCallback);
     }
 

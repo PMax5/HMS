@@ -17,7 +17,7 @@ public class RpcServer extends com.rabbitmq.client.RpcServer {
         super(channel, queueName);
     }
 
-    public void addOperation(Operations operationId, DeliverCallback deliverCallback) throws IOException {
+    public void addOperationHandler(Operations operationId, DeliverCallback deliverCallback) throws IOException {
         this.operations.put(operationId, deliverCallback);
     }
 
@@ -29,5 +29,11 @@ public class RpcServer extends com.rabbitmq.client.RpcServer {
 
         this.getChannel().basicPublish("", delivery.getProperties().getReplyTo(), replyProperties, responseBytes);
         this.getChannel().basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+    }
+
+    public void executeOperationHandler(Delivery delivery) throws IOException {
+        Operations operation = (Operations) delivery.getProperties().getHeaders().get("operationType");
+        DeliverCallback operationHandler = this.operations.get(operation);
+        this.getChannel().basicConsume(this.getQueueName(), false, operationHandler, (consumerTag -> {}));
     }
 }
