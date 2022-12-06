@@ -1,9 +1,6 @@
 package models;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.DeliverCallback;
-import com.rabbitmq.client.RpcClientParams;
+import com.rabbitmq.client.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -14,7 +11,7 @@ import java.util.concurrent.ExecutionException;
 
 public class RpcClient extends com.rabbitmq.client.RpcClient {
 
-    private Map<Operations, DeliverCallback> operations = new TreeMap<>();
+    private final Map<Operations, DeliverCallback> operations = new TreeMap<>();
     private final String queueName;
 
     public RpcClient(RpcClientParams params, String queueName) throws IOException {
@@ -25,6 +22,11 @@ public class RpcClient extends com.rabbitmq.client.RpcClient {
 
     public void addOperationReplyHandler(Operations operationId, DeliverCallback deliverCallback) throws IOException {
         this.operations.put(operationId, deliverCallback);
+    }
+
+    public void executeOperationReplyHandler(Operations operationId, Channel channel) throws IOException {
+        DeliverCallback operationHandler = this.operations.get(operationId);
+        channel.basicConsume(this.queueName, false, operationHandler, (consumerTag -> {}));
     }
 
     public byte[] sendRequest(String configQueueName, Channel channel, byte[] requestBytes) throws IOException, ExecutionException, InterruptedException {
