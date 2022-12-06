@@ -11,6 +11,8 @@
 
     <groupId>hms</groupId>
     <artifactId>protos</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
 
     <properties>
         <maven.compiler.source>14</maven.compiler.source>
@@ -29,6 +31,16 @@
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
             <version>${version.protobuf}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>${version.grpc}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>${version.javax.annotation-api}</version>
         </dependency>
     </dependencies>
 
