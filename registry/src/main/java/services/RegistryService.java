@@ -6,20 +6,17 @@ import models.Operations;
 import models.RpcClient;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 public class RegistryService {
 
     private final RabbitMqService rabbitMqService;
-    private final Config config;
+    private final ConfigService configService;
 
-    public RegistryService(Config config) {
+    public RegistryService() {
         this.rabbitMqService = new RabbitMqService();
-        this.config = config;
+        this.configService = new ConfigService();
     }
 
     public void loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
@@ -28,10 +25,15 @@ public class RegistryService {
         Channel channel = rabbitMqService.createNewChannel();
 
         hmsProto.Config.GetConfigRequest configRequest = hmsProto.Config.GetConfigRequest.newBuilder()
-                .setServiceId(this.config.getServiceId())
+                .setServiceId(this.configService.getServiceId())
                 .build();
 
-        final byte[] response = rpcClient.sendRequest(configQueueName, channel, Operations.CONFIG_REQUEST, configRequest.toByteArray());
+        final byte[] response = rpcClient.sendRequest(
+                configQueueName,
+                channel,
+                Operations.CONFIG_REQUEST,
+                configRequest.toByteArray()
+        );
     }
 
     public void registerUser() {
