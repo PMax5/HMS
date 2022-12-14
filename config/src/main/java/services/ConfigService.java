@@ -8,6 +8,6 @@ public class ConfigService {
 
     public String getConfig(String serviceId) {
         // TODO: Get config from DB
-        return "";
+        return "KEK";
     }
 }

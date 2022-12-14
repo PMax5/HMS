@@ -38,7 +38,7 @@ public class RpcClient extends com.rabbitmq.client.RpcClient {
         String replyQueueName = channel.queueDeclare().getQueue();
 
         final Map<String, Object> headers = new TreeMap<>();
-        headers.put("operationType", operationType);
+        headers.put("operationType", operationType.toString());
 
         AMQP.BasicProperties props = new AMQP.BasicProperties
                 .Builder()

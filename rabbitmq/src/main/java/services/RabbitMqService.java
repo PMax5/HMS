@@ -78,7 +78,7 @@ public class RabbitMqService {
 
     public RpcServer newRpcServer(String queueName) throws IOException, TimeoutException {
         Channel channel = this.createNewChannel();
-        channel.queueDeclare(queueName, true, false, true, null);
+        channel.queueDeclare(queueName, true, false, false, null);
         channel.queuePurge(queueName);
         return new RpcServer(channel, queueName);
     }

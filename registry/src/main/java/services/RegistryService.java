@@ -2,6 +2,7 @@ package services;
 
 import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.RpcClientParams;
 import models.Config;
 import models.Operations;
 import models.RpcClient;
@@ -22,8 +23,8 @@ public class RegistryService {
 
     public void loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
         String configQueueName = this.rabbitMqService.getRabbitMqConfig().getConfigQueue();
-        RpcClient rpcClient = new RpcClient(null, configQueueName);
         Channel channel = rabbitMqService.createNewChannel();
+        RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), configQueueName);
 
         hmsProto.Config.GetConfigRequest configRequest = hmsProto.Config.GetConfigRequest.newBuilder()
                 .setServiceId(SERVICE_ID)
@@ -37,7 +38,9 @@ public class RegistryService {
         );
 
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
-        this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
+        //this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
+
+        System.out.println("CONFIG " + configResponse.getServiceConfig());
     }
 
     public void registerUser() {

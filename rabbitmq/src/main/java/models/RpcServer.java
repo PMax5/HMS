@@ -11,14 +11,14 @@ import java.util.TreeMap;
 
 public class RpcServer extends com.rabbitmq.client.RpcServer {
 
-    private final Map<Operations, DeliverCallback> operations = new TreeMap<>();
+    private final Map<Operations, Operation> operations = new TreeMap<>();
 
     public RpcServer(Channel channel, String queueName) throws IOException {
         super(channel, queueName);
     }
 
-    public void addOperationHandler(Operations operationId, DeliverCallback deliverCallback) throws IOException {
-        this.operations.put(operationId, deliverCallback);
+    public void addOperationHandler(Operations operationId, Operation operation) throws IOException {
+        this.operations.put(operationId, operation);
     }
 
     public void sendResponseAndAck(Delivery delivery, byte[] responseBytes) throws IOException {
@@ -32,8 +32,11 @@ public class RpcServer extends com.rabbitmq.client.RpcServer {
     }
 
     public void executeOperationHandler(Delivery delivery) throws IOException {
-        Operations operation = (Operations) delivery.getProperties().getHeaders().get("operationType");
-        DeliverCallback operationHandler = this.operations.get(operation);
-        this.getChannel().basicConsume(this.getQueueName(), false, operationHandler, (consumerTag -> {}));
+        Operations operationId = Operations.valueOf((String) delivery.getProperties().getHeaders().get("operationType"));
+        Operation operation = this.operations.get(operationId);
+
+        System.out.println(operationId);
+
+        operation.execute("", delivery);
     }
 }
