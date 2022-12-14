@@ -1,5 +1,6 @@
 package services;
 
+import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import models.Config;
 import models.Operations;
@@ -12,11 +13,11 @@ import java.util.concurrent.TimeoutException;
 public class RegistryService {
 
     private final RabbitMqService rabbitMqService;
-    private final ConfigService configService;
+    private final static String SERVICE_ID = "service_registry";
+    private Config config;
 
     public RegistryService() {
         this.rabbitMqService = new RabbitMqService();
-        this.configService = new ConfigService();
     }
 
     public void loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
@@ -25,7 +26,7 @@ public class RegistryService {
         Channel channel = rabbitMqService.createNewChannel();
 
         hmsProto.Config.GetConfigRequest configRequest = hmsProto.Config.GetConfigRequest.newBuilder()
-                .setServiceId(this.configService.getServiceId())
+                .setServiceId(SERVICE_ID)
                 .build();
 
         final byte[] response = rpcClient.sendRequest(
@@ -34,6 +35,9 @@ public class RegistryService {
                 Operations.CONFIG_REQUEST,
                 configRequest.toByteArray()
         );
+
+        hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
+        this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
     }
 
     public void registerUser() {

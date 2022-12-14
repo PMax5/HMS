@@ -1,4 +1,3 @@
-import services.ConfigService;
 import services.RegistryService;
 
 import java.io.IOException;
