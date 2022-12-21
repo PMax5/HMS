@@ -9,7 +9,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>hms</groupId>
     <artifactId>protos</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>

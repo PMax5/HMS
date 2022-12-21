@@ -9,12 +9,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>config</artifactId>
+    <artifactId>data</artifactId>
 
     <properties>
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
-        <mainClass>ConfigApp</mainClass>
+        <mainClass>DataApp</mainClass>
         <port>8080</port>
     </properties>
 

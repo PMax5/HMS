@@ -38,9 +38,7 @@ public class RegistryService {
         );
 
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
-        //this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
-
-        System.out.println("CONFIG " + configResponse.getServiceConfig());
+        this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
     }
 
     public void registerUser() {

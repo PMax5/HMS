@@ -13,6 +13,7 @@
         <module>protos</module>
         <module>registry</module>
         <module>rabbitmq</module>
+        <module>data</module>
     </modules>
 
     <properties>
