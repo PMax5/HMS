@@ -32,10 +32,8 @@ public class RpcServer extends com.rabbitmq.client.RpcServer {
     }
 
     public void executeOperationHandler(Delivery delivery) throws IOException {
-        Operations operationId = Operations.valueOf((String) delivery.getProperties().getHeaders().get("operationType"));
+        Operations operationId = Operations.valueOf(delivery.getProperties().getHeaders().get("operationType").toString());
         Operation operation = this.operations.get(operationId);
-
-        System.out.println(operationId);
 
         operation.execute("", delivery);
     }

@@ -29,7 +29,7 @@ public class RpcClient extends com.rabbitmq.client.RpcClient {
         channel.basicConsume(this.queueName, false, operationHandler, (consumerTag -> {}));
     }
 
-    public byte[] sendRequest(String configQueueName,
+    public byte[] sendRequest(String queueName,
                               Channel channel,
                               Operations operationType,
                               byte[] requestBytes
@@ -47,10 +47,10 @@ public class RpcClient extends com.rabbitmq.client.RpcClient {
                 .replyTo(replyQueueName)
                 .build();
 
-        channel.basicPublish("", this.queueName, props, requestBytes);
+        channel.basicPublish("", queueName, props, requestBytes);
         final CompletableFuture<byte[]> response = new CompletableFuture<>();
 
-        String cTag = channel.basicConsume(configQueueName, true, (consumerTag, delivery) -> {
+        String cTag = channel.basicConsume(replyQueueName, true, (consumerTag, delivery) -> {
             if (delivery.getProperties().getCorrelationId().equals(corrId)) {
                 response.complete(delivery.getBody());
             }

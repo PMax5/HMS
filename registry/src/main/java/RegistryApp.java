@@ -12,6 +12,7 @@ public class RegistryApp {
         try {
             registryService.loadServiceConfig();
         } catch (IOException | TimeoutException | ExecutionException | InterruptedException e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
         }
 
