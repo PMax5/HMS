@@ -1,0 +1,17 @@
+//
+// Protocol buffers definition for the Data Processing Service.
+//
+
+syntax = "proto3";
+package hmsProto;
+
+
+message InsertDataRequest {
+    string driverId = 1;
+    string routeId = 2;
+    repeated int32 bpm = 3;
+    repeated int32 drowsiness = 4;
+    repeated int32 averageSpeed = 5;
+}
+
+message InsertDataResponse {}
