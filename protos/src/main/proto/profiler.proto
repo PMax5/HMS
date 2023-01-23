@@ -17,6 +17,19 @@ enum VEHICLE_TYPE {
     LONG_DISTANCE = 1;
 }
 
+enum SHIFT_TYPE {
+    SHIFT_MORNING = 0;
+    SHIFT_AFTERNOON = 1;
+    SHIFT_NIGHT = 2;
+}
+
+enum ROUTE_CHARACTERISTIC {
+    HIGH_TRAFFIC = 0;
+    LOW_TRAFFIC = 1;
+    CRIMINAL_AREA = 2;
+    THIN_ROADS = 3;
+}
+
 // Types
 
 message Vehicle {
@@ -30,17 +43,18 @@ message Interval {
 }
 
 message Profile {
-    Interval ageRange = 1;
-    GENDER gender = 2;
-    Interval bpmRange = 3;
-    Interval drowsinessRange = 4;
-    Interval shiftHoursRange = 5;
+    int32 id = 1;
+    Interval ageRange = 2;
+    GENDER gender = 3;
+    Interval shiftHoursRange = 4;
+    SHIFT_TYPE shiftType = 5;
+    repeated int32 routeIds = 6;
 }
 
 message Route {
     int32 id = 1;
     repeated Vehicle vehicles = 2;
-    repeated Profile profiles = 3;
+    repeated ROUTE_CHARACTERISTIC characteristics = 3;
 }
 
 message UserData {
@@ -50,8 +64,6 @@ message UserData {
     GENDER gender = 4;
     Profile profile = 5;
     repeated Route routes = 6;
-    int32 weight = 7;
-    int32 height = 8;
 }
 
 // Requests/Responses
