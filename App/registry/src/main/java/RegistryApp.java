@@ -1,3 +1,4 @@
+import services.HyperledgerService;
 import services.RegistryService;
 
 import java.io.IOException;
@@ -10,8 +11,11 @@ public class RegistryApp {
         RegistryService registryService = new RegistryService();
 
         try {
+            HyperledgerService hyperledgerService = new HyperledgerService();
+            hyperledgerService.enrollAdminUser();
+
             registryService.loadServiceConfig();
-        } catch (IOException | TimeoutException | ExecutionException | InterruptedException e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
