@@ -1,4 +1,9 @@
 .idea/
+.gradle/
+Contracts/userdata/.gradle
 target/
+build/
 .iml
 .env
+.bin
+.lock
