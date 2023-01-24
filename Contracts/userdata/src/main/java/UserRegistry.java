@@ -107,5 +107,11 @@ public final class UserRegistry {
         return user;
     }
 
+    @Transaction()
+    public boolean deleteUser(final Context ctx, final String username) {
+        User user = this.queryUser(ctx, username);
 
+        ctx.getStub().delState(user.getUsername());
+        return true;
+    }
 }
