@@ -99,15 +99,15 @@ public class HyperledgerService {
             }
         };
 
-        for (int i = 0; i < length; i++) {
-            RegistrationRequest registrationRequest = new RegistrationRequest(usernames.get(i));
+        for (String username : usernames) {
+            RegistrationRequest registrationRequest = new RegistrationRequest(username);
             registrationRequest.setAffiliation(affiliation);
-            registrationRequest.setEnrollmentID(usernames.get(i));
+            registrationRequest.setEnrollmentID(username);
             String enrollmentSecret = this.hfcaClient.register(registrationRequest, adminUser);
-            Enrollment enrollment = this.hfcaClient.enroll(usernames.get(i), enrollmentSecret);
-            this.wallet.put(usernames.get(i), Identities.newX509Identity(mspId, enrollment));
+            Enrollment enrollment = this.hfcaClient.enroll(username, enrollmentSecret);
+            this.wallet.put(username, Identities.newX509Identity(mspId, enrollment));
 
-            System.out.println("Successfully registered user " + usernames.get(i) + " and enrolled them.");
+            System.out.println("Successfully registered user " + username + " and enrolled them.");
         }
 
     }
