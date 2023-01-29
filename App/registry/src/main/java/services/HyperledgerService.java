@@ -1,5 +1,8 @@
 package services;
 
+import com.owlike.genson.Genson;
+import models.Gender;
+import models.UserRole;
 import org.hyperledger.fabric.gateway.*;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.User;
@@ -8,27 +11,35 @@ import org.hyperledger.fabric_ca.sdk.EnrollmentRequest;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
 import org.hyperledger.fabric_ca.sdk.RegistrationRequest;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 public class HyperledgerService {
 
     private final HFCAClient hfcaClient;
     private final Wallet wallet;
+    private final Genson genson;
 
     private final static String ADMIN_USER_ID = "admin";
+    private final static String REGISTRY_USER_ID = "admin";
+    private final static String REGISTRY_CHANNEL = "userdata";
+    private final static String REGISTRY_CONTRACT = "userdata";
 
     public HyperledgerService() throws Exception {
         Properties properties = new Properties();
-        properties.put("pemFile", "../properties/organizations/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem");
+        properties.put("pemFile", "resources/ca.org1.example.com-cert.pem");
         properties.put("allowAllHostNames", "true");
 
         this.hfcaClient = HFCAClient.createNewInstance("https://localhost:7054", properties);
         this.hfcaClient.setCryptoSuite(CryptoSuiteFactory.getDefault().getCryptoSuite());
         this.wallet = Wallets.newFileSystemWallet(Paths.get("wallet"));
+        this.genson = new Genson();
     }
 
     public void enrollAdminUser() throws Exception {
@@ -56,7 +67,6 @@ public class HyperledgerService {
             return;
         }
 
-        final int length = usernames.size();
         User adminUser = new User() {
             @Override
             public String getName() {
@@ -109,6 +119,32 @@ public class HyperledgerService {
 
             System.out.println("Successfully registered user " + username + " and enrolled them.");
         }
+    }
 
+    public Contract getContract() throws IOException {
+        Path networkConfigPath = Paths.get( "resources", "connection-org1.yaml");
+        Gateway gateway = Gateway.createBuilder()
+                .identity(this.wallet, REGISTRY_USER_ID)
+                .networkConfig(networkConfigPath)
+                .discovery(true)
+                .connect();
+
+        return gateway.getNetwork(REGISTRY_CHANNEL).getContract(REGISTRY_CONTRACT);
+    }
+
+    public models.User registerUser(String username, String name, int age, Gender gender,
+                                    UserRole userRole, String hashedPassword)
+            throws IOException, ContractException, InterruptedException, TimeoutException {
+        Contract contract = this.getContract();
+        byte[] user = contract.submitTransaction("createUser",
+                username,
+                name,
+                String.valueOf(age),
+                gender.toString(),
+                userRole.toString(),
+                hashedPassword
+        );
+
+        return this.genson.deserialize(user, models.User.class);
     }
 }

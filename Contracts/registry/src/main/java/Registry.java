@@ -1,5 +1,6 @@
 import com.owlike.genson.Genson;
 import org.hyperledger.fabric.contract.Context;
+import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.contract.annotation.*;
 import org.hyperledger.fabric.shim.ChaincodeException;
 import org.hyperledger.fabric.shim.ChaincodeStub;
@@ -10,19 +11,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Contract(
-        name = "UserRegistry",
+        name = "registry",
         info = @Info(
-                title = "UserRegistry Contract",
-                description = "HMS UserRegistry contract",
-                version = "1.0",
-                contact = @Contact(
-                        email = "admin@hms.hms",
-                        name = "HMS"
-                )
+            title = "Registry Contract",
+            description = "HMS UserRegistry contract",
+            version = "1.0",
+            contact = @Contact(
+                    email = "servers@pedromax.pt",
+                    name = "HMS"
+            )
         )
 )
 @Default
-public final class UserRegistry {
+public final class Registry implements ContractInterface {
 
     private final Genson genson = new Genson();
 
@@ -31,7 +32,7 @@ public final class UserRegistry {
         USER_ALREADY_EXISTS
     }
 
-    @Transaction()
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
     public User queryUser(final Context ctx, final String key) {
         String userState = ctx.getStub().getStringState(key);
 
@@ -42,24 +43,24 @@ public final class UserRegistry {
         return genson.deserialize(userState, User.class);
     }
 
-    @Transaction()
-    public User createUser(final Context ctx, final String key, final String name, final String username, final int age,
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
+    public User createUser(final Context ctx, final String username, final String name, final int age,
                            final GENDER gender, final String hashedPassword) {
         ChaincodeStub stub = ctx.getStub();
-        String userState = stub.getStringState(key);
+        String userState = stub.getStringState(username);
 
         if (!userState.isEmpty()) {
-            throw new ChaincodeException("User " + key + " already exists.", UserRegistryErrors.USER_ALREADY_EXISTS.toString());
+            throw new ChaincodeException("User " + username + " already exists.", UserRegistryErrors.USER_ALREADY_EXISTS.toString());
         }
 
         User user = new User(name, username, age, gender, hashedPassword);
         userState = genson.serialize(user);
-        stub.putStringState(key, userState);
+        stub.putStringState(username, userState);
 
         return user;
     }
 
-    @Transaction()
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
     public List<String> queryAllUsers(final Context ctx) {
         ChaincodeStub stub = ctx.getStub();
 
@@ -73,14 +74,14 @@ public final class UserRegistry {
         return queryResults;
     }
 
-    @Transaction()
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
     public Boolean login(final Context ctx, final String username, final String hashedPassword) {
         User user = this.queryUser(ctx, username);
 
         return user.getUsername().equals(username) && user.getHashedPassword().equals(hashedPassword);
     }
 
-    @Transaction()
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
     public User updateUserProfileId(final Context ctx, final String username, final int profileId) {
         User user = this.queryUser(ctx, username);
         user.setProfileId(profileId);
@@ -89,7 +90,7 @@ public final class UserRegistry {
         return user;
     }
 
-    @Transaction()
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
     public User addRouteId(final Context ctx, final String username, final int newRouteId) {
         User user = this.queryUser(ctx, username);
         user.addRouteId(newRouteId);
@@ -98,7 +99,7 @@ public final class UserRegistry {
         return user;
     }
 
-    @Transaction()
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
     public User removeRouteId(final Context ctx, final String username, final int targetRouteId) {
         User user = this.queryUser(ctx, username);
         user.removeRouteId(targetRouteId);
@@ -107,7 +108,7 @@ public final class UserRegistry {
         return user;
     }
 
-    @Transaction()
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
     public boolean deleteUser(final Context ctx, final String username) {
         User user = this.queryUser(ctx, username);
 

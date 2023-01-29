@@ -92,5 +92,6 @@
     <orderEntry type="library" name="Maven: com.cloudant:cloudant-http:2.19.0" level="project" />
     <orderEntry type="library" name="Maven: com.rabbitmq:amqp-client:5.16.0" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.36" level="project" />
+    <orderEntry type="library" name="Maven: com.owlike:genson:1.6" level="project" />
   </component>
 </module>
