@@ -11,6 +11,7 @@ import org.hyperledger.fabric_ca.sdk.EnrollmentRequest;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
 import org.hyperledger.fabric_ca.sdk.RegistrationRequest;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,13 +30,14 @@ public class HyperledgerService {
     private final static String ADMIN_USER_ID = "admin";
     private final static String REGISTRY_USER_ID = "admin";
     private final static String REGISTRY_CHANNEL = "userdata";
-    private final static String REGISTRY_CONTRACT = "userdata";
+    private final static String REGISTRY_CONTRACT = "registry";
 
     public HyperledgerService() throws Exception {
         Properties properties = new Properties();
-        properties.put("pemFile", "resources/ca.org1.example.com-cert.pem");
+        properties.put("pemFile", "resources/org1.example.com/ca/ca.org1.example.com-cert.pem");
         properties.put("allowAllHostNames", "true");
 
+        System.setProperty("org.hyperledger.fabric.sdk.service_discovery.as_localhost", "true");
         this.hfcaClient = HFCAClient.createNewInstance("https://localhost:7054", properties);
         this.hfcaClient.setCryptoSuite(CryptoSuiteFactory.getDefault().getCryptoSuite());
         this.wallet = Wallets.newFileSystemWallet(Paths.get("wallet"));
@@ -122,7 +124,7 @@ public class HyperledgerService {
     }
 
     public Contract getContract() throws IOException {
-        Path networkConfigPath = Paths.get( "resources", "connection-org1.yaml");
+        Path networkConfigPath = Paths.get( "resources", "org1.example.com", "connection-org1.json");
         Gateway gateway = Gateway.createBuilder()
                 .identity(this.wallet, REGISTRY_USER_ID)
                 .networkConfig(networkConfigPath)
