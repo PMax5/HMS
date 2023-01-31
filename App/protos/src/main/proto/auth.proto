@@ -65,6 +65,14 @@ message UserAuthorizationResponse {
     ErrorMessage errorMessage = 2;
 }
 
+message UserLogoutRequest {
+    string token = 1;
+}
+
+message UserLogoutResponse {
+    ErrorMessage errorMessage = 1;
+}
+
 // TODO: Services
 message ServiceRegistrationRequest {
     string serviceId = 1;
