@@ -6,6 +6,6 @@ public enum Operations {
 
     // Registry Service
     NEW_USER_REQUEST,
-    LOGIN_REQUEST,
+    AUTHENTICATION_REQUEST,
     AUTHORIZATION_REQUEST
 }
