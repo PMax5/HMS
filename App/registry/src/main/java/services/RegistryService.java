@@ -18,7 +18,6 @@ public class RegistryService {
     private final static String SERVICE_ID = "service_registry";
     private final static int TOKEN_LENGTH = 32;
     private final Map<String, User> authenticatedUsers;
-    private Config config;
 
     public RegistryService(RabbitMqService rabbitMqService) throws Exception {
         this.rabbitMqService = rabbitMqService;
@@ -46,9 +45,8 @@ public class RegistryService {
 
         // TODO: Fetch config from service.
         // this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
-        this.config = new Config(SERVICE_ID);
 
-        return this.config;
+        return new Config(SERVICE_ID);
     }
 
     public void loadHyperledgerService() throws Exception {
@@ -56,7 +54,8 @@ public class RegistryService {
         // TODO: Load Hyperledger Fabric users
     }
 
-    public User registerUser(String username, String name, int age, Gender gender, UserRole userRole, String hashedPassword) {
+    public User registerUser(String username, String name, int age,
+                             Gender gender, UserRole userRole, String hashedPassword) {
         try {
             return this.hyperledgerService.registerUser(
                     username,
@@ -90,6 +89,8 @@ public class RegistryService {
             String token = this.generateToken();
             this.authenticatedUsers.put(token, user);
 
+            System.out.println("[Registry Service] Authenticated user " +
+                    user.getUsername() + "successfully with token " + token);
             return token;
         } catch (IOException | ContractException e) {
             System.err.println("[Registry Service] Failed to login user: " + e.getMessage());
@@ -100,10 +101,25 @@ public class RegistryService {
     public UserRole authorizeUser(String userToken) {
         User user = this.getUserByToken(userToken);
         if (user != null) {
+            System.out.println("[Registry Service] Authorized user " + user.getUsername() + " with token " + userToken);
             return user.getRole();
         }
 
+        System.err.println("[Registry Service] Failed to find authenticated user with token " + userToken);
         return null;
+    }
+
+    public boolean logoutUser(String userToken) {
+        User user = this.getUserByToken(userToken);
+        if (user != null) {
+            this.authenticatedUsers.remove(userToken);
+            System.out.println("[Registry Service] Logged out user " + user.getUsername() + " successfully.");
+            return true;
+        } else {
+            System.err.println("[Registry Service] Failed to logout user with token " +
+                    userToken + ". It is not logged in.");
+            return false;
+        }
     }
 
     public void registerService(String serviceId) {

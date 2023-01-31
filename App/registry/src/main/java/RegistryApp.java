@@ -120,6 +120,28 @@ public class RegistryApp {
                     }
             );
 
+            registryServer.addOperationHandler(Operations.LOGOUT_REQUEST, new Operation() {
+                        @Override
+                        public void execute(String consumerTag, Delivery delivery) throws IOException {
+                            Auth.UserLogoutRequest request = Auth.UserLogoutRequest
+                                    .parseFrom(delivery.getBody());
+
+                            boolean success = registryService.logoutUser(
+                                    request.getToken()
+                            );
+
+                            Auth.UserLogoutResponse.Builder responseBuilder = Auth.UserLogoutResponse.newBuilder();
+
+                            if (!success) {
+                                responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
+                                        .setDescription("[Registry Service] Failed to logout user with token: " + request.getToken())
+                                        .build());
+                            }
+
+                            registryServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
+                        }
+                    }
+            );
 
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
                 System.out.println("Received new operation request!");
