@@ -65,7 +65,7 @@ message UserAuthorizationResponse {
     ErrorMessage errorMessage = 2;
 }
 
-// Services
+// TODO: Services
 message ServiceRegistrationRequest {
     string serviceId = 1;
 }
