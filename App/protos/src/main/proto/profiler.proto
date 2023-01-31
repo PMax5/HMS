@@ -5,12 +5,9 @@
 syntax = "proto3";
 package hmsProto;
 
-// Enums
+import "auth.proto";
 
-enum GENDER {
-    MASCULINE = 0;
-    FEMININE = 1;
-}
+// Enums
 
 enum VEHICLE_TYPE {
     SHORT_DISTANCE = 0;
@@ -45,7 +42,7 @@ message Interval {
 message Profile {
     int32 id = 1;
     Interval ageRange = 2;
-    GENDER gender = 3;
+    hmsProto.GENDER gender = 3;
     Interval shiftHoursRange = 4;
     SHIFT_TYPE shiftType = 5;
     repeated int32 routeIds = 6;
@@ -55,15 +52,6 @@ message Route {
     int32 id = 1;
     repeated Vehicle vehicles = 2;
     repeated ROUTE_CHARACTERISTIC characteristics = 3;
-}
-
-message UserData {
-    string name = 1;
-    string username = 2;
-    int32 age = 3;
-    GENDER gender = 4;
-    Profile profile = 5;
-    repeated Route routes = 6;
 }
 
 // Requests/Responses

@@ -12,14 +12,38 @@ enum ROLE {
     HEALTH_STAFF = 2;
 }
 
-message UserRegistrationRequest {
-    ROLE role = 1;
-    string name = 2;
-    string username = 3;
-    string password = 4;
+enum GENDER {
+    MALE = 0;
+    FEMALE = 1;
 }
 
-message UserRegistrationResponse {}
+message UserRegistrationRequest {
+    string username = 1;
+    string name = 2;
+    int32 age = 3;
+    GENDER gender = 4;
+    ROLE role = 5;
+    string password = 6;
+}
+
+message UserData {
+    string name = 1;
+    string username = 2;
+    int32 age = 3;
+    hmsProto.GENDER gender = 4;
+    ROLE role = 5;
+    int32 profileId = 6;
+    repeated int32 routeIds = 7;
+}
+
+message ErrorMessage {
+    string description = 1;
+}
+
+message UserRegistrationResponse {
+    UserData userdata = 1;
+    ErrorMessage errorMessage = 2;
+}
 
 message UserAuthenticationRequest {
     string username = 1;
@@ -35,7 +59,7 @@ message UserAuthorizationRequest {
 }
 
 message UserAuthorizationResponse {
-    ROLE role = 2;
+    ROLE role = 1;
 }
 
 // Services
