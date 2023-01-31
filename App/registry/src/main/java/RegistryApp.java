@@ -60,6 +60,41 @@ public class RegistryApp {
                     }
             );
 
+            registryServer.addOperationHandler(Operations.AUTHENTICATION_REQUEST, new Operation() {
+                        @Override
+                        public void execute(String consumerTag, Delivery delivery) throws IOException {
+                            Auth.UserAuthenticationRequest request = Auth.UserAuthenticationRequest
+                                    .parseFrom(delivery.getBody());
+
+                            String token = registryService.authenticateUser(
+                                    request.getUsername(),
+                                    request.getPassword()
+                            );
+
+                            Auth.UserAuthenticationResponse.Builder responseBuilder = Auth.UserAuthenticationResponse.newBuilder();
+
+                            if (token == null) {
+                                responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
+                                        .setDescription("[Registry Service] Failed to login user " + request.getUsername())
+                                        .build());
+                            } else {
+                                User user = registryService.getUserByToken(token);
+                                responseBuilder.setUserdata(Auth.UserData.newBuilder()
+                                        .setUsername(user.getUsername())
+                                        .setName(user.getName())
+                                        .setAge(user.getAge())
+                                        .setGender(Auth.GENDER.valueOf(user.getGender().toString()))
+                                        .setRole(Auth.ROLE.valueOf(user.getRole().toString()))
+                                        .setProfileId(user.getProfileId())
+                                        .addAllRouteIds(user.getRouteIds())
+                                        .build());
+                            }
+
+                            registryServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
+                        }
+                    }
+            );
+
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
                 System.out.println("Received new operation request!");
                 registryServer.executeOperationHandler(delivery);

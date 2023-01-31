@@ -11,7 +11,6 @@ import org.hyperledger.fabric_ca.sdk.EnrollmentRequest;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
 import org.hyperledger.fabric_ca.sdk.RegistrationRequest;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -123,21 +122,24 @@ public class HyperledgerService {
         }
     }
 
-    public Contract getContract() throws IOException {
+    public Contract getContract(Gateway gateway) {
+        return gateway.getNetwork(REGISTRY_CHANNEL).getContract(REGISTRY_CONTRACT);
+    }
+
+    public Gateway getGateway() throws IOException {
         Path networkConfigPath = Paths.get( "resources", "org1.example.com", "connection-org1.json");
-        Gateway gateway = Gateway.createBuilder()
+        return Gateway.createBuilder()
                 .identity(this.wallet, REGISTRY_USER_ID)
                 .networkConfig(networkConfigPath)
                 .discovery(true)
                 .connect();
-
-        return gateway.getNetwork(REGISTRY_CHANNEL).getContract(REGISTRY_CONTRACT);
     }
 
     public models.User registerUser(String username, String name, int age, Gender gender,
                                     UserRole userRole, String hashedPassword)
             throws IOException, ContractException, InterruptedException, TimeoutException {
-        Contract contract = this.getContract();
+        Gateway gateway = this.getGateway();
+        Contract contract = this.getContract(gateway);
         byte[] user = contract.submitTransaction("createUser",
                 username,
                 name,
@@ -147,6 +149,17 @@ public class HyperledgerService {
                 hashedPassword
         );
 
+        gateway.close();
+        return this.genson.deserialize(user, models.User.class);
+    }
+
+    public models.User login(String username, String hashedPassword) throws IOException, ContractException {
+        Gateway gateway = this.getGateway();
+        Contract contract = this.getContract(gateway);
+
+        byte[] user = contract.evaluateTransaction("login", username, hashedPassword);
+
+        gateway.close();
         return this.genson.deserialize(user, models.User.class);
     }
 }
