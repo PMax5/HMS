@@ -1,19 +1,13 @@
 package models;
 
 public class Config {
-    private final String databaseAddress;
-    private final String databasePort;
+    private final String channelName;
 
-    public Config(String databaseAddress, String databasePort) {
-        this.databaseAddress = databaseAddress;
-        this.databasePort = databasePort;
+    public Config(String channelName) {
+        this.channelName = channelName;
     }
 
-    public String getDatabaseAddress() {
-        return databaseAddress;
-    }
-
-    public String getDatabasePort() {
-        return databasePort;
+    public String getChannelName() {
+        return this.channelName;
     }
 }

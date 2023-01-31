@@ -12,17 +12,17 @@ import java.util.concurrent.TimeoutException;
 
 public class RegistryService {
 
-    //private final RabbitMqService rabbitMqService;
+    private final RabbitMqService rabbitMqService;
     private final HyperledgerService hyperledgerService;
     private final static String SERVICE_ID = "service_registry";
     private Config config;
 
-    public RegistryService() throws Exception {
-        //this.rabbitMqService = new RabbitMqService();
+    public RegistryService(RabbitMqService rabbitMqService) throws Exception {
+        this.rabbitMqService = rabbitMqService;
         this.hyperledgerService = new HyperledgerService();
     }
 
-    /*public void loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
+    public Config loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
         String configQueueName = this.rabbitMqService.getRabbitMqConfig().getConfigQueue();
         Channel channel = rabbitMqService.createNewChannel();
         RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), configQueueName);
@@ -39,20 +39,32 @@ public class RegistryService {
         );
 
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
-        this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
-    }*/
+
+        // TODO: Fetch config from service.
+        // this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
+        this.config = new Config(SERVICE_ID);
+
+        return this.config;
+    }
 
     public void loadHyperledgerService() throws Exception {
         this.hyperledgerService.enrollAdminUser();
         // TODO: Load Hyperledger Fabric users
     }
 
-    public void registerUser() {
+    public User registerUser(String username, String name, int age, Gender gender, UserRole userRole, String hashedPassword) {
         try {
-            User user = this.hyperledgerService.registerUser("test", "test", 23, Gender.MALE, UserRole.DRIVER, "hrretrgnejwtnjtntnrtrntrnt");
-            System.out.println(user.toString());
+            return this.hyperledgerService.registerUser(
+                    username,
+                    name,
+                    age,
+                    gender,
+                    userRole,
+                    hashedPassword
+            );
         } catch (IOException | ContractException | InterruptedException | TimeoutException e) {
             System.err.println("[Registry Service] Failed to register user: " + e.getMessage());
+            return null;
         }
     }
 
