@@ -62,6 +62,7 @@ message UserAuthorizationRequest {
 
 message UserAuthorizationResponse {
     ROLE role = 1;
+    ErrorMessage errorMessage = 2;
 }
 
 // Services
