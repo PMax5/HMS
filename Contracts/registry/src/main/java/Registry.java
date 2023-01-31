@@ -15,7 +15,7 @@ import java.util.List;
         info = @Info(
             title = "Registry Contract",
             description = "HMS UserRegistry contract",
-            version = "1.0",
+            version = "2.1",
             contact = @Contact(
                     email = "servers@pedromax.pt",
                     name = "HMS"
@@ -44,8 +44,8 @@ public final class Registry implements ContractInterface {
     }
 
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public User createUser(final Context ctx, final String username, final String name, final int age,
-                           final GENDER gender, final String hashedPassword) {
+    public User createUser(final Context ctx, final String username, final String name, final int age, 
+                           final String gender, final String role, final String hashedPassword) {
         ChaincodeStub stub = ctx.getStub();
         String userState = stub.getStringState(username);
 
@@ -53,7 +53,7 @@ public final class Registry implements ContractInterface {
             throw new ChaincodeException("User " + username + " already exists.", UserRegistryErrors.USER_ALREADY_EXISTS.toString());
         }
 
-        User user = new User(name, username, age, gender, hashedPassword);
+        User user = new User(name, username, age, gender, role, hashedPassword);
         userState = genson.serialize(user);
         stub.putStringState(username, userState);
 
@@ -61,17 +61,18 @@ public final class Registry implements ContractInterface {
     }
 
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public List<String> queryAllUsers(final Context ctx) {
+    public String queryAllUsers(final Context ctx) {
         ChaincodeStub stub = ctx.getStub();
 
         QueryResultsIterator<KeyValue> results = stub.getStateByRange("", ""); // Fetch all users with empty ""
-        List<String> queryResults = new ArrayList<>();
+        List<User> queryResults = new ArrayList<>();
 
         for (KeyValue result: results) {
-            queryResults.add(result.getStringValue());
+            User user = genson.deserialize(result.getStringValue(), User.class);
+            queryResults.add(user);
         }
 
-        return queryResults;
+        return genson.serialize(queryResults);
     }
 
     @Transaction(intent = Transaction.TYPE.EVALUATE)

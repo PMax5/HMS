@@ -7,11 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-enum GENDER {
-    MALE,
-    FEMALE
-}
-
 @DataType()
 public final class User {
 
@@ -22,7 +17,10 @@ public final class User {
     private final String username;
 
     @Property()
-    private final GENDER gender;
+    private final String gender;
+
+    @Property()
+    private final String role;
 
     @Property()
     private final long createdAt;
@@ -40,12 +38,14 @@ public final class User {
     private final List<Integer> routeIds;
 
     public User(@JsonProperty("name") final String name, @JsonProperty("username") final String username,
-                @JsonProperty("age") final int age, @JsonProperty("gender") final GENDER gender,
+                @JsonProperty("age") final int age, @JsonProperty("gender") final String gender,
+                @JsonProperty("role") final String role,
                 @JsonProperty("hashedPassword") final String hashedPassword) {
         this.name = name;
         this.username = username;
         this.age = age;
         this.gender = gender;
+        this.role = role;
         this.createdAt = Instant.now().getEpochSecond();
         this.routeIds = new ArrayList<>();
         this.hashedPassword = hashedPassword;
@@ -63,8 +63,12 @@ public final class User {
         return this.age;
     }
 
-    public GENDER getGender() {
+    public String getGender() {
         return this.gender;
+    }
+
+    public String getRole() {
+        return this.role;
     }
 
     public int getProfileId() {
@@ -102,6 +106,7 @@ public final class User {
                 this.getUsername(),
                 this.getAge(),
                 this.getGender(),
+                this.getRole(),
                 this.getProfileId(),
                 this.getRouteIds(),
                 this.getCreatedAt()
