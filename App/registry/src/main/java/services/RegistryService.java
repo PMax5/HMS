@@ -97,9 +97,13 @@ public class RegistryService {
         }
     }
 
-    public boolean authorizeUser(String userToken) {
-        // TODO: Validate user token
-        return false;
+    public UserRole authorizeUser(String userToken) {
+        User user = this.getUserByToken(userToken);
+        if (user != null) {
+            return user.getRole();
+        }
+
+        return null;
     }
 
     public void registerService(String serviceId) {

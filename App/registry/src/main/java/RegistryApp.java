@@ -95,6 +95,32 @@ public class RegistryApp {
                     }
             );
 
+            registryServer.addOperationHandler(Operations.AUTHORIZATION_REQUEST, new Operation() {
+                        @Override
+                        public void execute(String consumerTag, Delivery delivery) throws IOException {
+                            Auth.UserAuthorizationRequest request = Auth.UserAuthorizationRequest
+                                    .parseFrom(delivery.getBody());
+
+                            UserRole role = registryService.authorizeUser(
+                                    request.getToken()
+                            );
+
+                            Auth.UserAuthorizationResponse.Builder responseBuilder = Auth.UserAuthorizationResponse.newBuilder();
+
+                            if (role == null) {
+                                responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
+                                        .setDescription("[Registry Service] Failed to authorize user with token: " + request.getToken())
+                                        .build());
+                            } else {
+                                responseBuilder.setRole(Auth.ROLE.valueOf(role.toString()));
+                            }
+
+                            registryServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
+                        }
+                    }
+            );
+
+
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
                 System.out.println("Received new operation request!");
                 registryServer.executeOperationHandler(delivery);
