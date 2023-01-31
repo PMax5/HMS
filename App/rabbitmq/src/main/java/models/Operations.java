@@ -1,5 +1,11 @@
 package models;
 
 public enum Operations {
-    CONFIG_REQUEST
+    // Config Service
+    CONFIG_REQUEST,
+
+    // Registry Service
+    NEW_USER_REQUEST,
+    LOGIN_REQUEST,
+    AUTHORIZATION_REQUEST
 }
