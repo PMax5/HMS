@@ -10,4 +10,6 @@ public enum Operations {
     AUTHORIZATION_REQUEST,
     LOGOUT_REQUEST,
     DELETE_USER_REQUEST
+
+    // Data Service
 }

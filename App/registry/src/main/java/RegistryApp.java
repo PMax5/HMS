@@ -10,7 +10,6 @@ import java.io.IOException;
 
 public class RegistryApp {
     public static void main(String[] args) {
-        // Load RabbitMQ config
         try {
             RabbitMqService rabbitMqService = new RabbitMqService();
             RegistryService registryService = new RegistryService(rabbitMqService);
