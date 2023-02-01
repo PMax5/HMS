@@ -73,6 +73,15 @@ message UserLogoutResponse {
     ErrorMessage errorMessage = 1;
 }
 
+message UserDeleteRequest {
+    string token = 1;
+    string username = 2;
+}
+
+message UserDeleteResponse {
+    ErrorMessage errorMessage = 1;
+}
+
 // TODO: Services
 message ServiceRegistrationRequest {
     string serviceId = 1;
