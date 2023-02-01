@@ -29,7 +29,8 @@ public final class Registry implements ContractInterface {
 
     private enum UserRegistryErrors {
         USER_NOT_FOUND,
-        USER_ALREADY_EXISTS
+        USER_ALREADY_EXISTS,
+        CREDENTIALS_DONT_MATCH
     }
 
     @Transaction(intent = Transaction.TYPE.EVALUATE)
@@ -67,6 +68,12 @@ public final class Registry implements ContractInterface {
         QueryResultsIterator<KeyValue> results = stub.getStateByRange("", ""); // Fetch all users with empty ""
         List<User> queryResults = new ArrayList<>();
 
+        try {
+            results.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         for (KeyValue result: results) {
             User user = genson.deserialize(result.getStringValue(), User.class);
             queryResults.add(user);
@@ -76,10 +83,14 @@ public final class Registry implements ContractInterface {
     }
 
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public Boolean login(final Context ctx, final String username, final String hashedPassword) {
+    public User login(final Context ctx, final String username, final String hashedPassword) {
         User user = this.queryUser(ctx, username);
 
-        return user.getUsername().equals(username) && user.getHashedPassword().equals(hashedPassword);
+        boolean valid = user.getUsername().equals(username) && user.getHashedPassword().equals(hashedPassword);
+        if (!valid)
+            throw new ChaincodeException("User " + username + " credentials do not match.", UserRegistryErrors.CREDENTIALS_DONT_MATCH.toString());
+
+        return user;
     }
 
     @Transaction(intent = Transaction.TYPE.SUBMIT)
