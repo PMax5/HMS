@@ -1,5 +1,6 @@
 package services;
 
+import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
 import models.Gender;
 import models.UserRole;
@@ -161,5 +162,26 @@ public class HyperledgerService {
 
         gateway.close();
         return this.genson.deserialize(user, models.User.class);
+    }
+
+    public List<models.User> getAllUsers() throws IOException, ContractException {
+        Gateway gateway = this.getGateway();
+        Contract contract = this.getContract(gateway);
+
+        byte[] users = contract.evaluateTransaction("queryAllUsers");
+
+        gateway.close();
+        return this.genson.deserialize(users, new GenericType<List<models.User>>(){});
+    }
+
+    public boolean deleteUser(String username) throws IOException, ContractException {
+        Gateway gateway = this.getGateway();
+        Contract contract = this.getContract(gateway);
+
+        byte[] result = contract.evaluateTransaction("deleteUser", username);
+
+        gateway.close();
+        return Boolean.parseBoolean(new String(result));
+
     }
 }

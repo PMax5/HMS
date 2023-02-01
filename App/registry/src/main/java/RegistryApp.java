@@ -143,6 +143,31 @@ public class RegistryApp {
                     }
             );
 
+            registryServer.addOperationHandler(Operations.DELETE_USER_REQUEST, new Operation() {
+                        @Override
+                        public void execute(String consumerTag, Delivery delivery) throws IOException {
+                            Auth.UserDeleteRequest request = Auth.UserDeleteRequest
+                                    .parseFrom(delivery.getBody());
+
+                            boolean success = registryService.deleteUser(
+                                    request.getToken(),
+                                    request.getUsername()
+                            );
+
+                            Auth.UserDeleteResponse.Builder responseBuilder = Auth.UserDeleteResponse.newBuilder();
+
+                            if (!success) {
+                                responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
+                                        .setDescription("[Registry Service] Failed to delete user with username: " +
+                                                request.getUsername())
+                                        .build());
+                            }
+
+                            registryServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
+                        }
+                    }
+            );
+
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
                 System.out.println("Received new operation request!");
                 registryServer.executeOperationHandler(delivery);

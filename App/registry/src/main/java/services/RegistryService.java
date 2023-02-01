@@ -122,6 +122,23 @@ public class RegistryService {
         }
     }
 
+    public boolean deleteUser(String authorToken, String targetUsername) {
+        User user = this.getUserByToken(authorToken);
+        if (!user.getRole().equals(UserRole.SUPERVISOR)) {
+            System.err.println("[Registry Service] Failed to delete user " +
+                    targetUsername + ". Insufficient permissions.");
+            return false;
+        }
+
+        try {
+            System.out.println("[Registry Service] Deleted user " + targetUsername + " successfully.");
+            return this.hyperledgerService.deleteUser(targetUsername);
+        } catch (IOException | ContractException e) {
+            System.err.println("[Registry Service] Failed to delete user " + targetUsername + ": " + e.getMessage());
+            return false;
+        }
+    }
+
     public void registerService(String serviceId) {
         // TODO: Register service
     }
