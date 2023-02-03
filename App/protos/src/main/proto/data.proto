@@ -9,9 +9,11 @@ package hmsProto;
 message InsertDataRequest {
     string driverId = 1;
     string routeId = 2;
-    repeated int32 bpm = 3;
-    repeated int32 drowsiness = 4;
-    repeated int32 averageSpeed = 5;
+    string vehicleId = 3;
+    repeated int32 bpm = 4;
+    repeated int32 drowsiness = 5;
+    repeated int32 averageSpeed = 6;
+    repeated uint64 timestamps = 7;
 }
 
 message InsertDataResponse {}
