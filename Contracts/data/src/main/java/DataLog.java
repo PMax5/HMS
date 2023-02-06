@@ -2,7 +2,6 @@ import com.owlike.genson.annotation.JsonProperty;
 import org.hyperledger.fabric.contract.annotation.DataType;
 import org.hyperledger.fabric.contract.annotation.Property;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,7 +9,7 @@ import java.util.Objects;
 public final class DataLog {
 
     @Property()
-    private final String driverId;
+    private final String userId;
 
     @Property()
     private final String routeId;
@@ -30,12 +29,12 @@ public final class DataLog {
     @Property()
     private final List<Long> timestampValues;
 
-    public DataLog(@JsonProperty("driverId") final String driverId, @JsonProperty("routeId") final String routeId,
+    public DataLog(@JsonProperty("driverId") final String userId, @JsonProperty("routeId") final String routeId,
                    @JsonProperty("vehicleId") final String vehicleId, @JsonProperty("bpmValues") final List<Integer> bpmValues,
                    @JsonProperty("drowsinessValues") final List<Integer> drowsinessValues,
                    @JsonProperty("speedValues") final List<Integer> speedValues,
                    @JsonProperty("timestampValues") final List<Long> timestampValues) {
-        this.driverId = driverId;
+        this.userId = userId;
         this.routeId = routeId;
         this.vehicleId = vehicleId;
         this.bpmValues = bpmValues;
@@ -45,7 +44,7 @@ public final class DataLog {
     }
 
     public String getDriverId() {
-        return this.driverId;
+        return this.userId;
     }
 
     public String getRouteId() {
