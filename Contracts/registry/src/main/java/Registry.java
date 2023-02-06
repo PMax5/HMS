@@ -15,7 +15,7 @@ import java.util.List;
         info = @Info(
             title = "Registry Contract",
             description = "HMS UserRegistry contract",
-            version = "2.1",
+            version = "1.0",
             contact = @Contact(
                     email = "servers@pedromax.pt",
                     name = "HMS"
