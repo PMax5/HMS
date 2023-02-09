@@ -1,9 +1,15 @@
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
+import com.rabbitmq.client.Delivery;
+import hmsProto.Auth;
 import models.Config;
+import models.Operation;
+import models.Operations;
 import models.RpcServer;
 import services.DataService;
 import services.RabbitMqService;
+
+import java.io.IOException;
 
 public class DataApp {
     public static void main(String[] args) {
@@ -17,7 +23,19 @@ public class DataApp {
             RpcServer dataServer = rabbitMqService.newRpcServer(config.getChannelName());
             Channel channel = dataServer.getChannel();
 
-            // TODO: Implement service operations handlers.
+            dataServer.addOperationHandler(Operations.SUBMIT_USER_DATALOG, new Operation() {
+                @Override
+                public void execute(String consumerTag, Delivery delivery) throws IOException {
+                    // TODO: Implement this method.
+                }
+            });
+
+            dataServer.addOperationHandler(Operations.GET_USER_DATALOGS, new Operation() {
+                @Override
+                public void execute(String consumerTag, Delivery delivery) throws IOException {
+                    // TODO: Implement this method.
+                }
+            });
 
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
                 System.out.println("[Data App] Received new operation request!");
