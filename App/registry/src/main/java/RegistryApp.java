@@ -174,7 +174,7 @@ public class RegistryApp {
 
             channel.basicConsume(config.getChannelName(), false, mainHandler, (consumerTag -> {}));
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
             e.printStackTrace();
         }
 
