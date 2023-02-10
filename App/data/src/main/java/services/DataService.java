@@ -47,7 +47,7 @@ public class DataService {
         return new Config(SERVICE_ID, "dataService");
     }
 
-    public void submitUserData(String username, int routeId, int vehicleId, List<Integer> bpmValues,
+    public DataLog submitUserData(String username, int routeId, int vehicleId, List<Integer> bpmValues,
                                List<Integer> drowsinessValues, List<Integer> speedValues, List<Long> timestampValues) {
         try {
             if (routeId < 0 || vehicleId < 0)
@@ -79,7 +79,7 @@ public class DataService {
                 }
             }
 
-            this.hyperledgerService.submitUserData(
+            return this.hyperledgerService.submitUserData(
                     username,
                     routeId,
                     vehicleId,
@@ -90,6 +90,7 @@ public class DataService {
             );
         } catch (Exception e) {
             System.err.println("[Data Service] Failed to submit data logs for user" + username + ": " + e.getMessage());
+            return null;
         }
     }
 
