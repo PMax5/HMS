@@ -49,13 +49,13 @@ public class HyperledgerService {
                 .connect();
     }
 
-    public void submitUserData(String username, int routeId, int vehicleId, List<Integer> bpm,
+    public DataLog submitUserData(String username, int routeId, int vehicleId, List<Integer> bpm,
                                List<Integer> drowsiness, List<Integer> averageSpeed, List<Long> timestamps)
             throws IOException, ContractException, InterruptedException, TimeoutException {
         Gateway gateway = this.getGateway();
         Contract contract = this.getContract(gateway);
 
-        contract.submitTransaction("CreateDataLog",
+        byte[] result = contract.submitTransaction("CreateDataLog",
                 username,
                 String.valueOf(routeId),
                 String.valueOf(vehicleId),
@@ -64,6 +64,9 @@ public class HyperledgerService {
                 String.valueOf(averageSpeed),
                 String.valueOf(timestamps)
         );
+        gateway.close();
+
+        return this.genson.deserialize(result, DataLog.class);
     }
 
     public List<DataLog> getLogsForUser(String username) throws IOException, ContractException {
