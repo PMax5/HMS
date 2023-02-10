@@ -29,16 +29,9 @@ public final class Data implements ContractInterface {
     private final Genson genson = new Genson();
 
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public DataLog CreateDataLog(final Context ctx, final String userId, final String routeId, final String vehicleId,
-                                 final List<Integer> bpm, final List<Integer> drowsiness, final List<Integer> averageSpeed,
-                                 final List<Long> timestamps) {
+    public void CreateDataLog(final Context ctx, final String dataLogString) {
         ChaincodeStub stub = ctx.getStub();
-
-        DataLog dataLog = new DataLog(userId, routeId, vehicleId, bpm, drowsiness, averageSpeed, timestamps);
-        String dataLogState = genson.serialize(dataLog);
-        stub.putStringState(String.valueOf(UUID.randomUUID()), dataLogState);
-
-        return dataLog;
+        stub.putStringState(String.valueOf(UUID.randomUUID()), dataLogString);
     }
 
     @Transaction(intent = Transaction.TYPE.EVALUATE)
