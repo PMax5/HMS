@@ -16,7 +16,6 @@ import java.util.concurrent.TimeoutException;
 
 public class HyperledgerService {
 
-    private final HFCAClient hfcaClient;
     private final Wallet wallet;
     private final Genson genson;
 
@@ -25,13 +24,7 @@ public class HyperledgerService {
     private final static String DATA_CONTRACT = "data";
 
     public HyperledgerService() throws Exception {
-        Properties properties = new Properties();
-        properties.put("pemFile", "resources/org1.example.com/ca/ca.org1.example.com-cert.pem");
-        properties.put("allowAllHostNames", "true");
-
         System.setProperty("org.hyperledger.fabric.sdk.service_discovery.as_localhost", "true");
-        this.hfcaClient = HFCAClient.createNewInstance("https://localhost:7054", properties);
-        this.hfcaClient.setCryptoSuite(CryptoSuiteFactory.getDefault().getCryptoSuite());
         this.wallet = Wallets.newFileSystemWallet(Paths.get("wallet"));
         this.genson = new Genson();
     }
