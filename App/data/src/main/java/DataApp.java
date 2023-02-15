@@ -23,7 +23,7 @@ public class DataApp {
 
             RpcServer dataServer = rabbitMqService.newRpcServer(config.getChannelName());
             Channel channel = dataServer.getChannel();
-            
+
             dataServer.addOperationHandler(Operations.SUBMIT_USER_DATALOG, new Operation() {
                 @Override
                 public void execute(String consumerTag, Delivery delivery) throws IOException {
