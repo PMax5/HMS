@@ -4,14 +4,12 @@ import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
 import models.DataLog;
 import org.hyperledger.fabric.gateway.*;
-import org.hyperledger.fabric.sdk.security.CryptoSuiteFactory;
-import org.hyperledger.fabric_ca.sdk.HFCAClient;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 public class HyperledgerService {
@@ -58,7 +56,7 @@ public class HyperledgerService {
                 timestamps
         );
 
-        contract.submitTransaction("CreateDataLog", this.genson.serialize(dataLog));
+        contract.submitTransaction("CreateDataLog", String.valueOf(UUID.randomUUID()), this.genson.serialize(dataLog));
         gateway.close();
 
         return dataLog;
@@ -71,7 +69,6 @@ public class HyperledgerService {
         byte[] result = contract.evaluateTransaction("GetDataLogsForUser", username);
         gateway.close();
 
-        return this.genson.deserialize(result, new GenericType<List<DataLog>>(){});
+        return this.genson.deserialize(result, new GenericType<List<DataLog>>() {});
     }
-
 }
