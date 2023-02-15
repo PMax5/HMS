@@ -44,7 +44,7 @@ public class DataService {
         // TODO: Fetch config from service.
         // this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
 
-        return new Config(SERVICE_ID, "dataService");
+        return new Config(SERVICE_ID, "dataUser");
     }
 
     public DataLog submitUserData(String username, int routeId, int vehicleId, List<Integer> bpmValues,
@@ -89,7 +89,7 @@ public class DataService {
                     timestampValues
             );
         } catch (Exception e) {
-            System.err.println("[Data Service] Failed to submit data logs for user" + username + ": " + e.getMessage());
+            System.err.println("[Data Service] Failed to submit data logs for user " + username + ": " + e.getMessage());
             return null;
         }
     }
