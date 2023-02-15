@@ -8,6 +8,8 @@ import services.DataService;
 import services.RabbitMqService;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DataApp {
@@ -21,7 +23,7 @@ public class DataApp {
 
             RpcServer dataServer = rabbitMqService.newRpcServer(config.getChannelName());
             Channel channel = dataServer.getChannel();
-
+            
             dataServer.addOperationHandler(Operations.SUBMIT_USER_DATALOG, new Operation() {
                 @Override
                 public void execute(String consumerTag, Delivery delivery) throws IOException {
