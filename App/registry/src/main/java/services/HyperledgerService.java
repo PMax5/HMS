@@ -61,9 +61,8 @@ public class HyperledgerService {
         System.out.println("The admin user was successfully registered.");
     }
 
-    public void registerServicesUsers(List<String> usernames, List<Set<String>> rolesSets,
-                                      String affiliation, String mspId) throws Exception {
-        X509Identity adminIdentity = (X509Identity) wallet.get(ADMIN_USER_ID);
+    public void registerServicesUsers(List<String> usernames, String affiliation, String mspId) throws Exception {
+        X509Identity adminIdentity = (X509Identity) this.wallet.get(ADMIN_USER_ID);
         if (adminIdentity == null) {
             System.out.println("The admin user is not registered. Failed to register a new Hyperledger Fabric user.");
             return;
@@ -87,7 +86,7 @@ public class HyperledgerService {
 
             @Override
             public String getAffiliation() {
-                return affiliation;
+                return null;
             }
 
             @Override
@@ -112,6 +111,13 @@ public class HyperledgerService {
         };
 
         for (String username : usernames) {
+            X509Identity userIdentity = (X509Identity) this.wallet.get(username);
+
+            if (userIdentity != null) {
+                System.out.println("The user " + username + " is already registered. ");
+                continue;
+            }
+
             RegistrationRequest registrationRequest = new RegistrationRequest(username);
             registrationRequest.setAffiliation(affiliation);
             registrationRequest.setEnrollmentID(username);

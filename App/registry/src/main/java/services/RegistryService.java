@@ -18,6 +18,7 @@ public class RegistryService {
     private final static String SERVICE_ID = "service_registry";
     private final static int TOKEN_LENGTH = 32;
     private final Map<String, User> authenticatedUsers;
+    private Config config;
 
     public RegistryService(RabbitMqService rabbitMqService) throws Exception {
         this.rabbitMqService = rabbitMqService;
@@ -46,12 +47,18 @@ public class RegistryService {
         // TODO: Fetch config from service.
         // this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
 
-        return new Config(SERVICE_ID);
+        this.config = new Config(SERVICE_ID);
+        return this.config;
     }
 
     public void loadHyperledgerService() throws Exception {
+        System.out.println("[Registry Service] Enrolling users...");
         this.hyperledgerService.enrollAdminUser();
-        // TODO: Load Hyperledger Fabric users
+        this.hyperledgerService.registerServicesUsers(
+                this.config.getServiceUsers(),
+                this.config.getUserAffiliation(),
+                this.config.getMspId()
+        );
     }
 
     public User registerUser(String username, String name, int age,
