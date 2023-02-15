@@ -1,0 +1,100 @@
+//
+// Protocol buffers definition for the Authentication Service.
+//
+
+syntax = "proto3";
+package hmsProto;
+
+// User
+enum ROLE {
+    DRIVER = 0;
+    SUPERVISOR = 1;
+    HEALTH_STAFF = 2;
+}
+
+enum GENDER {
+    MALE = 0;
+    FEMALE = 1;
+}
+
+message UserRegistrationRequest {
+    string username = 1;
+    string name = 2;
+    int32 age = 3;
+    GENDER gender = 4;
+    ROLE role = 5;
+    string password = 6;
+}
+
+message UserData {
+    string name = 1;
+    string username = 2;
+    int32 age = 3;
+    hmsProto.GENDER gender = 4;
+    ROLE role = 5;
+    int32 profileId = 6;
+    repeated int32 routeIds = 7;
+}
+
+message ErrorMessage {
+    string description = 1;
+}
+
+message UserRegistrationResponse {
+    UserData userdata = 1;
+    ErrorMessage errorMessage = 2;
+}
+
+message UserAuthenticationRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message UserAuthenticationResponse {
+    string token = 1;
+    UserData userdata = 2;
+    ErrorMessage errorMessage = 3;
+}
+
+message UserAuthorizationRequest {
+    string token = 1;
+}
+
+message UserAuthorizationResponse {
+    ROLE role = 1;
+    ErrorMessage errorMessage = 2;
+}
+
+message UserLogoutRequest {
+    string token = 1;
+}
+
+message UserLogoutResponse {
+    ErrorMessage errorMessage = 1;
+}
+
+message UserDeleteRequest {
+    string token = 1;
+    string username = 2;
+}
+
+message UserDeleteResponse {
+    ErrorMessage errorMessage = 1;
+}
+
+// TODO: Services
+message ServiceRegistrationRequest {
+    string serviceId = 1;
+}
+
+message ServiceRegistrationResponse {
+    string serviceToken = 1;
+}
+
+message ServiceAuthenticationRequest {
+    string serviceToken = 1;
+}
+
+message ServiceAuthenticationResponse {
+    string serviceId = 1;
+}
