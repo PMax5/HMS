@@ -33,7 +33,7 @@ public final class DataLog {
     @Property()
     private final Long createdAt;
 
-    public DataLog(@JsonProperty("driverId") final String userId, @JsonProperty("routeId") final String routeId,
+    public DataLog(@JsonProperty("userId") final String userId, @JsonProperty("routeId") final String routeId,
                    @JsonProperty("vehicleId") final String vehicleId, @JsonProperty("bpmValues") final List<Integer> bpmValues,
                    @JsonProperty("drowsinessValues") final List<Integer> drowsinessValues,
                    @JsonProperty("speedValues") final List<Integer> speedValues,
@@ -48,7 +48,7 @@ public final class DataLog {
         this.createdAt = Instant.now().getEpochSecond();
     }
 
-    public String getDriverId() {
+    public String getUserId() {
         return this.userId;
     }
 
@@ -83,7 +83,7 @@ public final class DataLog {
     @Override
     public int hashCode() {
         return Objects.hash(
-                this.getDriverId(),
+                this.getUserId(),
                 this.getRouteId(),
                 this.getVehicleId(),
                 this.getBpmValues(),

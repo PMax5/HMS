@@ -8,7 +8,6 @@ import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 
 @Contract(
@@ -16,7 +15,7 @@ import java.util.UUID;
         info = @Info(
                 title = "Data Contract",
                 description = "HMS Data Contract",
-                version = "1.0",
+                version = "1.4",
                 contact = @Contact(
                         email = "servers@pedromax.pt",
                         name = "HMS"
@@ -29,13 +28,13 @@ public final class Data implements ContractInterface {
     private final Genson genson = new Genson();
 
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public void CreateDataLog(final Context ctx, final String dataLogString) {
+    public void CreateDataLog(final Context ctx, final String logId, final String dataLogString) {
         ChaincodeStub stub = ctx.getStub();
-        stub.putStringState(String.valueOf(UUID.randomUUID()), dataLogString);
+        stub.putStringState(logId, dataLogString);
     }
 
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public String GetDataLogsForUser(final Context ctx, final String username) {
+    public DataLog[] GetDataLogsForUser(final Context ctx, final String username) {
         ChaincodeStub stub = ctx.getStub();
 
         String query = String.format("{ \"selector\": { \"userId\": \"%s\" } }", username);
@@ -43,17 +42,13 @@ public final class Data implements ContractInterface {
 
         List<DataLog> queryResults = new ArrayList<>();
 
-        try {
-            results.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        System.out.println("Fetching results...");
         for (KeyValue result: results) {
             DataLog dataLog = genson.deserialize(result.getStringValue(), DataLog.class);
+            System.out.println("Result for user: " + dataLog.getUserId());
             queryResults.add(dataLog);
         }
 
-        return genson.serialize(queryResults);
+        return queryResults.toArray(new DataLog[0]);
     }
 }
