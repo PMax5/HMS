@@ -1,5 +1,7 @@
 package models;
 
+import com.owlike.genson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class DataLog {
@@ -12,8 +14,11 @@ public class DataLog {
     private final List<Integer> speedValues;
     private final List<Long> timestampValues;
 
-    public DataLog(String userId, int routeId, int vehicleId, List<Integer> bpm, List<Integer> drowsiness,
-                   List<Integer> averageSpeed, List<Long> timestamps) {
+    public DataLog(@JsonProperty("userId") String userId, @JsonProperty("routeId") int routeId,
+                   @JsonProperty("vehicleId") int vehicleId, @JsonProperty("bpmValues") List<Integer> bpm,
+                   @JsonProperty("drowsinessValues") List<Integer> drowsiness,
+                   @JsonProperty("speedValues") List<Integer> averageSpeed,
+                   @JsonProperty("timestampValues") List<Long> timestamps) {
         this.userId = userId;
         this.routeId = routeId;
         this.vehicleId = vehicleId;
