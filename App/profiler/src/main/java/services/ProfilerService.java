@@ -2,11 +2,10 @@ package services;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.RpcClientParams;
-import models.Config;
-import models.Operations;
-import models.RpcClient;
+import models.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -42,5 +41,18 @@ public class ProfilerService {
         // this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
 
         return new Config(SERVICE_ID, "profilerUser");
+    }
+
+    public void registerProfile(int id, int minAge, int maxAge, Gender gender, int minHours, int maxHours,
+                                List<ShiftType> shiftTypes, List<Integer> routeIds) {
+        // TODO: Implement this method
+    }
+
+    public void setProfile(String username, int profileId) {
+        // TODO: Implement this method
+    }
+
+    public void analyizeDriverData(String username) {
+        // TODO: Implement this method
     }
 }

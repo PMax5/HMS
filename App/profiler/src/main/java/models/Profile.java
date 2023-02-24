@@ -57,6 +57,6 @@ public class Profile {
     }
 
     public List<Integer> getRouteIds() {
-        return routeIds;
+        return this.routeIds;
     }
 }
