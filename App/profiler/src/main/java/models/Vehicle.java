@@ -11,4 +11,12 @@ public class Vehicle {
         this.id = id;
         this.type = type;
     }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public VehicleType getType() {
+        return this.type;
+    }
 }
