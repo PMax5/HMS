@@ -8,8 +8,6 @@ import services.DataService;
 import services.RabbitMqService;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 public class DataApp {
