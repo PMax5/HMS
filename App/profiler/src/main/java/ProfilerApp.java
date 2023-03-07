@@ -1,4 +1,5 @@
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
 import hmsProto.Auth;
 import hmsProto.Profiler;
@@ -149,6 +150,13 @@ public class ProfilerApp {
                     profilerServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
                 }
             });
+
+            DeliverCallback mainHandler = (consumerTag, delivery) -> {
+                System.out.println("[Profiler App] Received new operation request!");
+                profilerServer.executeOperationHandler(delivery);
+            };
+            
+            channel.basicConsume(config.getChannelName(), false, mainHandler, (consumerTag -> {}));
         } catch (Exception e) {
             System.err.println("[Profiler App] Unexpected error occurred: " + e.getMessage());
         }
