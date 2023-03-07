@@ -1,13 +1,20 @@
 package services;
 
+import repos.ConfigRepo;
+
 public class ConfigService {
 
+    private final ConfigRepo configRepo;
+
+    public ConfigService() {
+        this.configRepo = new ConfigRepo();
+    }
+
     public void updateConfig(String serviceId, String serviceConfig) {
-        // TODO: Save config to DB
+        this.configRepo.setServiceConfig(serviceId, serviceConfig);
     }
 
     public String getConfig(String serviceId) {
-        // TODO: Get config from DB
-        return "KEK";
+        return this.configRepo.getServiceConfig(serviceId);
     }
 }
