@@ -40,7 +40,7 @@ message Interval {
 }
 
 message Profile {
-    int32 id = 1;
+    string id = 1;
     Interval ageRange = 2;
     hmsProto.GENDER gender = 3;
     Interval shiftHoursRange = 4;

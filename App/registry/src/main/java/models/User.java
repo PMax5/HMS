@@ -9,7 +9,7 @@ public class User {
     String username;
     String password;
     int age;
-    int profileId;
+    String profileId;
     List<Integer> routeIds;
 
     public UserRole getRole() {
@@ -60,11 +60,11 @@ public class User {
         this.age = age;
     }
 
-    public int getProfileId() {
+    public String getProfileId() {
         return profileId;
     }
 
-    public void setProfileId(int profileId) {
+    public void setProfileId(String profileId) {
         this.profileId = profileId;
     }
 

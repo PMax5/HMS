@@ -29,7 +29,7 @@ public final class User {
     private final int age;
 
     @Property()
-    private String hashedPassword;
+    private final String hashedPassword;
 
     @Property()
     private int profileId;

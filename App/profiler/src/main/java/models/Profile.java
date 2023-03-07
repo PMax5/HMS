@@ -6,14 +6,14 @@ import java.util.List;
 
 public class Profile {
 
-    private int id;
+    private String id;
     private List<Integer> ageRage;
     private Gender gender;
     private List<Integer> shiftHoursRage;
     private List<ShiftType> shiftTypes;
     private List<Integer> routeIds;
 
-    public Profile(@JsonProperty("id") int id, @JsonProperty("ageRange") List<Integer> ageRage,
+    public Profile(@JsonProperty("id") String id, @JsonProperty("ageRange") List<Integer> ageRage,
                    @JsonProperty("gender") String gender,
                    @JsonProperty("shiftHoursRage") List<Integer> shiftHoursRage,
                    @JsonProperty("shiftTypes") List<String> shiftTypes,
@@ -28,7 +28,7 @@ public class Profile {
         this.routeIds = routeIds;
     }
 
-    public int getId() {
+    public String getId() {
         return this.id;
     }
 

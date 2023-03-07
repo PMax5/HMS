@@ -32,7 +32,7 @@ message UserData {
     int32 age = 3;
     hmsProto.GENDER gender = 4;
     ROLE role = 5;
-    int32 profileId = 6;
+    string profileId = 6;
     repeated int32 routeIds = 7;
 }
 
