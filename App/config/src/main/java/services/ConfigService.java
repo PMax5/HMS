@@ -10,7 +10,7 @@ public class ConfigService {
         this.configRepo = new ConfigRepo();
     }
 
-    public void updateConfig(String serviceId, String serviceConfig) {
+    public void setConfig(String serviceId, String serviceConfig) {
         this.configRepo.setServiceConfig(serviceId, serviceConfig);
     }
 

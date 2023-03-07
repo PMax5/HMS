@@ -22,7 +22,7 @@ public class ConfigApp {
             RpcServer configServer = rabbitMqService.newRpcServer(configQueueName);
             Channel channel = configServer.getChannel();
 
-            System.out.println("Initializing server...");
+            System.out.println("[Config App] Initializing server...");
             configServer.addOperationHandler(Operations.CONFIG_REQUEST, new Operation() {
                     @Override
                     public void execute(String consumerTag, Delivery delivery) throws IOException {
@@ -35,6 +35,17 @@ public class ConfigApp {
                     }
                 }
             );
+
+            configServer.addOperationHandler(Operations.SET_CONFIG_REQUEST, new Operation() {
+                @Override
+                public void execute(String consumerTag, Delivery delivery) throws IOException {
+                    Config.SetConfigRequest request = Config.SetConfigRequest.parseFrom(delivery.getBody());
+                    Config.SetConfigResponse response = Config.SetConfigResponse.newBuilder().build();
+
+                    configService.setConfig(request.getServiceId(), request.getServiceConfig());
+                    configServer.sendResponseAndAck(delivery, response.toByteArray());
+                }
+            });
 
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
                 System.out.println("Received new operation request!");
