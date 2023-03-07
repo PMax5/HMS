@@ -48,7 +48,7 @@ public class ConfigApp {
             });
 
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
-                System.out.println("Received new operation request!");
+                System.out.println("[Config App] Received new operation request!");
                 configServer.executeOperationHandler(delivery);
             };
 

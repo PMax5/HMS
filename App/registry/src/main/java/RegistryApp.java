@@ -170,7 +170,7 @@ public class RegistryApp {
             );
 
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
-                System.out.println("Received new operation request!");
+                System.out.println("[Registry App] Received new operation request!");
                 registryServer.executeOperationHandler(delivery);
             };
 
