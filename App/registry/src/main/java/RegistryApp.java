@@ -177,7 +177,7 @@ public class RegistryApp {
             channel.basicConsume(config.getChannelName(), false, mainHandler, (consumerTag -> {}));
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            e.printStackTrace();
+            System.err.println("[Registry App] Unexpected error occurred: " + e.getMessage());
         }
 
     }
