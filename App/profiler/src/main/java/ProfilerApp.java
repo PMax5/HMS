@@ -155,7 +155,7 @@ public class ProfilerApp {
                 System.out.println("[Profiler App] Received new operation request!");
                 profilerServer.executeOperationHandler(delivery);
             };
-            
+
             channel.basicConsume(config.getChannelName(), false, mainHandler, (consumerTag -> {}));
         } catch (Exception e) {
             System.err.println("[Profiler App] Unexpected error occurred: " + e.getMessage());

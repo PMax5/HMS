@@ -5,12 +5,12 @@
 syntax = "proto3";
 package hmsProto;
 
-message SubmitConfigRequest {
+message SetConfigRequest {
     string serviceId = 1;
     string serviceConfig = 2;
 }
 
-message SubmitConfigResponse {}
+message SetConfigResponse {}
 
 message GetConfigRequest {
     string serviceId = 1;

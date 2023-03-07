@@ -3,6 +3,7 @@ package models;
 public enum Operations {
     // Config Service
     CONFIG_REQUEST,
+    SET_CONFIG_REQUEST,
 
     // Registry Service
     NEW_USER_REQUEST,
