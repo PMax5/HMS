@@ -73,6 +73,15 @@ public class ProfilerService {
         }
     }
 
+    public List<Profile> getProfiles() {
+        try {
+            return this.hyperledgerService.getProfiles();
+        } catch (IOException | ContractException e) {
+            System.err.println("[Profiler Service] Failed to get profiles: " + e.getMessage());
+            return null;
+        }
+    }
+
     public void analyizeDriverData(String username) {
         // TODO: Implement this method
     }
