@@ -44,7 +44,7 @@ message Profile {
     Interval ageRange = 2;
     hmsProto.GENDER gender = 3;
     Interval shiftHoursRange = 4;
-    SHIFT_TYPE shiftType = 5;
+    repeated SHIFT_TYPE shiftTypes = 5;
     repeated int32 routeIds = 6;
 }
 
@@ -55,11 +55,31 @@ message Route {
 }
 
 // Requests/Responses
-
-message UserDataRequest {
-    string username = 1;
+message RegisterProfileRequest {
+    Interval ageRange = 1;
+    hmsProto.GENDER gender = 2;
+    Interval shiftHoursRange = 3;
+    repeated SHIFT_TYPE shiftTypes = 4;
+    repeated int32 routeIds = 5;
 }
 
-message UserDataResponse {
-    UserData userData = 1;
+message RegisterProfileResponse {
+    Profile profileData = 1;
+    ErrorMessage errorMessage = 2;
+}
+
+message GetProfilesRequest {}
+
+message GetProfilesResponse {
+    repeated Profile profiles = 1;
+    ErrorMessage errorMessage = 2;
+}
+
+message SetProfileRequest {
+    string username = 1;
+    string profileId = 2;
+}
+
+message SetProfileResponse {
+    ErrorMessage errorMessage = 1;
 }

@@ -5,17 +5,18 @@
 syntax = "proto3";
 
 import "auth.proto";
+import "data.proto";
 import "profiler.proto";
 package gateways;
 
 // Profiles
 message GetUserDataRequest {
-    hmsProto.UserDataRequest request = 1;
+    hmsProto.DataRequest request = 1;
     string authToken = 2;
 }
 
 message GetUserDataResponse {
-    hmsProto.UserDataResponse response = 1;
+    hmsProto.DataResponse response = 1;
 }
 
 // Authentication
