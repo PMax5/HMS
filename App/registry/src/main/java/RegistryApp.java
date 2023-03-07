@@ -36,11 +36,13 @@ public class RegistryApp {
                                     request.getPassword()
                             );
 
-                            Auth.UserRegistrationResponse.Builder responseBuilder = Auth.UserRegistrationResponse.newBuilder();
+                            Auth.UserRegistrationResponse.Builder responseBuilder = Auth.UserRegistrationResponse
+                                    .newBuilder();
 
                             if (user == null) {
                                 responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
-                                        .setDescription("[Registry Service] Failed to register user " + request.getUsername())
+                                        .setDescription("[Registry Service] Failed to register user " +
+                                                request.getUsername())
                                         .build());
                             } else {
                                 responseBuilder.setUserdata(Auth.UserData.newBuilder()
