@@ -13,19 +13,14 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class ConfigRepo {
     private final String databaseAddress;
-    private final String databaseUsername;
-    private final String databasePassword;
     private MongoClient mongoClient;
 
     public ConfigRepo() {
         this.databaseAddress = System.getenv("CONFIG_DATABASE_ADDRESS");
-        this.databaseUsername = System.getenv("CONFIG_DATABASE_USERNAME");
-        this.databasePassword = System.getenv("CONFIG_DATABASE_PASSWORD");
     }
 
     private MongoDatabase newConnection() {
-        String uri = "mongodb+srv://" + this.databaseUsername + ":" + this.databasePassword + "@"
-                + this.databaseAddress + "/?retryWrites=true&w=majority";
+        String uri = "mongodb://" + this.databaseAddress + "/?retryWrites=true&w=majority";
 
         ServerApi serverApi = ServerApi.builder()
                 .version(ServerApiVersion.V1)
@@ -38,7 +33,7 @@ public class ConfigRepo {
 
 
         this.mongoClient = MongoClients.create(settings);
-        return this.mongoClient.getDatabase("config");
+        return this.mongoClient.getDatabase("configuration");
     }
 
     public String getServiceConfig(String serviceId) {
