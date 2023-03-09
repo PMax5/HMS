@@ -1,5 +1,6 @@
 package services;
 
+import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.RpcClientParams;
 import models.*;
@@ -28,7 +29,7 @@ public class RegistryService {
 
     public Config loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
         String configQueueName = this.rabbitMqService.getRabbitMqConfig().getConfigQueue();
-        Channel channel = rabbitMqService.createNewChannel();
+        Channel channel = this.rabbitMqService.createNewChannel();
         RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), configQueueName);
 
         hmsProto.Config.GetConfigRequest configRequest = hmsProto.Config.GetConfigRequest.newBuilder()
@@ -43,12 +44,7 @@ public class RegistryService {
         );
 
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
-
-        // TODO: Fetch config from service.
-        // this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
-
-        this.config = new Config(SERVICE_ID);
-        return this.config;
+        return new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
     }
 
     public void loadHyperledgerService() throws Exception {

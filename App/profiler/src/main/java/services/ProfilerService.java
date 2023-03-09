@@ -1,5 +1,6 @@
 package services;
 
+import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.RpcClientParams;
 import models.*;
@@ -37,11 +38,8 @@ public class ProfilerService {
         );
 
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
-
-        // TODO: Fetch config from service.
-        // this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
-
-        return new Config(SERVICE_ID, "profilerUser");
+        System.out.println(configResponse.getServiceConfig());
+        return new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
     }
 
     public Profile registerProfile(int minAge, int maxAge, String gender, int minHours, int maxHours,
