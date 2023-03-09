@@ -1,5 +1,7 @@
 package models;
 
+import com.owlike.genson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,13 +11,14 @@ public class Config {
     private final String userAffiliation;
     private final String mspId;
 
-    public Config(String channelName) {
+    public Config(@JsonProperty("channelName") String channelName,
+                  @JsonProperty("userAffiliation") String userAffiliation, @JsonProperty("mspId") String mspId) {
         this.channelName = channelName;
         this.userIds = new ArrayList<>();
         this.userIds.add("dataUser");
 
-        this.userAffiliation = "org1.department1";
-        this.mspId = "Org1MSP";
+        this.userAffiliation = userAffiliation;
+        this.mspId = mspId;
     }
 
     public String getChannelName() {
