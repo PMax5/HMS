@@ -43,7 +43,7 @@ public class ConfigRepo {
         Document document = mongoCollection.find(eq("serviceId", serviceId)).first();
         this.mongoClient.close();
 
-        return document != null ? document.toJson() : "{}";
+        return document != null ? document.getString("serviceConfig") : "{}";
     }
 
     public void setServiceConfig(String serviceId, String serviceConfig) {
