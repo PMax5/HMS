@@ -1,5 +1,6 @@
 package services;
 
+import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.RpcClientParams;
 import models.Config;
@@ -40,11 +41,7 @@ public class DataService {
         );
 
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
-
-        // TODO: Fetch config from service.
-        // this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
-
-        return new Config(SERVICE_ID, "dataUser");
+        return new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
     }
 
     public DataLog submitUserData(String username, int routeId, int vehicleId, List<Integer> bpmValues,
