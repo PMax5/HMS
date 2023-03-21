@@ -52,6 +52,7 @@ message Route {
     int32 id = 1;
     repeated Vehicle vehicles = 2;
     repeated ROUTE_CHARACTERISTIC characteristics = 3;
+    repeated int32 slots = 4;
 }
 
 // Requests/Responses
