@@ -2,6 +2,7 @@ package models;
 
 import com.owlike.genson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Profile {
@@ -22,6 +23,7 @@ public class Profile {
         this.ageRage = ageRage;
         this.gender = Gender.valueOf(gender);
         this.shiftHoursRage = shiftHoursRage;
+        this.shiftTypes = new ArrayList<>();
         shiftTypes.forEach((shiftType) -> {
             this.shiftTypes.add(ShiftType.valueOf(shiftType));
         });
