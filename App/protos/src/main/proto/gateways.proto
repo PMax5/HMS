@@ -9,19 +9,9 @@ import "data.proto";
 import "profiler.proto";
 package hmsProto;
 
-// Authentication
-message RegisterUserRequest {
-    hmsProto.UserRegistrationRequest request = 1;
-    string authToken = 2;
-}
-
-message RegisterUserResponse {
-    hmsProto.UserRegistrationResponse response = 1;
-}
-
 service Gateways {
     // Registry Service
-    rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse);
+    rpc RegisterUser(hmsProto.UserRegistrationRequest) returns (hmsProto.UserRegistrationResponse);
     rpc AuthenticateUser(hmsProto.UserAuthenticationRequest) returns (hmsProto.UserAuthenticationResponse);
     rpc LogoutUser(hmsProto.UserLogoutRequest) returns (hmsProto.UserLogoutResponse);
     rpc DeleteUser(hmsProto.UserDeleteRequest) returns (hmsProto.UserDeleteResponse);

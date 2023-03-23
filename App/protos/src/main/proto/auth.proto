@@ -24,6 +24,7 @@ message UserRegistrationRequest {
     GENDER gender = 4;
     ROLE role = 5;
     string password = 6;
+    string token = 7;
 }
 
 message UserData {

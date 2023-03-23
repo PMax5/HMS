@@ -55,7 +55,8 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
     }
 
     @Override
-    public void registerUser(RegisterUserRequest request, StreamObserver<RegisterUserResponse> responseObserver) {
+    public void registerUser(Auth.UserRegistrationRequest request,
+                             StreamObserver<Auth.UserRegistrationResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_registry");
         try {
             RpcClient rpcClient = this.getRpcClient(serviceQueueName);
@@ -67,7 +68,7 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
             );
             rpcClient.close();
 
-            responseObserver.onNext(RegisterUserResponse.parseFrom(response));
+            responseObserver.onNext(Auth.UserRegistrationResponse.parseFrom(response));
             responseObserver.onCompleted();
         } catch (IOException | TimeoutException | ExecutionException | InterruptedException e) {
             System.err.println("[Gateway Service] An error occurred while registering a user: " + e.getMessage());
