@@ -8,21 +8,21 @@ import java.util.List;
 public class Profile {
 
     private String id;
-    private List<Integer> ageRage;
+    private List<Integer> ageRange;
     private Gender gender;
-    private List<Integer> shiftHoursRage;
+    private List<Integer> shiftHoursRange;
     private List<ShiftType> shiftTypes;
     private List<Integer> routeIds;
 
-    public Profile(@JsonProperty("id") String id, @JsonProperty("ageRange") List<Integer> ageRage,
+    public Profile(@JsonProperty("id") String id, @JsonProperty("ageRange") List<Integer> ageRange,
                    @JsonProperty("gender") String gender,
-                   @JsonProperty("shiftHoursRage") List<Integer> shiftHoursRage,
+                   @JsonProperty("shiftHoursRage") List<Integer> shiftHoursRange,
                    @JsonProperty("shiftTypes") List<String> shiftTypes,
                    @JsonProperty("routeIds") List<Integer> routeIds) {
         this.id = id;
-        this.ageRage = ageRage;
+        this.ageRange = ageRange;
         this.gender = Gender.valueOf(gender);
-        this.shiftHoursRage = shiftHoursRage;
+        this.shiftHoursRange = shiftHoursRange;
         this.shiftTypes = new ArrayList<>();
         shiftTypes.forEach((shiftType) -> {
             this.shiftTypes.add(ShiftType.valueOf(shiftType));
@@ -35,11 +35,11 @@ public class Profile {
     }
 
     public Integer getMinAge() {
-        return this.ageRage.get(0);
+        return this.ageRange.get(0);
     }
 
     public Integer getMaxAge() {
-        return this.ageRage.get(1);
+        return this.ageRange.get(1);
     }
 
     public Gender getGender() {
@@ -47,11 +47,11 @@ public class Profile {
     }
 
     public Integer getMinShiftHours() {
-        return this.shiftHoursRage.get(0);
+        return this.shiftHoursRange.get(0);
     }
 
     public Integer getMaxShiftHours() {
-        return this.shiftHoursRage.get(1);
+        return this.shiftHoursRange.get(1);
     }
 
     public List<ShiftType> getShiftTypes() {
