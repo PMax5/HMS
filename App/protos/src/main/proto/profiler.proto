@@ -62,6 +62,7 @@ message RegisterProfileRequest {
     Interval shiftHoursRange = 3;
     repeated SHIFT_TYPE shiftTypes = 4;
     repeated int32 routeIds = 5;
+    string token = 6;
 }
 
 message RegisterProfileResponse {
@@ -69,7 +70,9 @@ message RegisterProfileResponse {
     ErrorMessage errorMessage = 2;
 }
 
-message GetProfilesRequest {}
+message GetProfilesRequest {
+    string token = 1;
+}
 
 message GetProfilesResponse {
     repeated Profile profiles = 1;

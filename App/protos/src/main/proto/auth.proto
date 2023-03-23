@@ -81,20 +81,3 @@ message UserDeleteRequest {
 message UserDeleteResponse {
     ErrorMessage errorMessage = 1;
 }
-
-// TODO: Services
-message ServiceRegistrationRequest {
-    string serviceId = 1;
-}
-
-message ServiceRegistrationResponse {
-    string serviceToken = 1;
-}
-
-message ServiceAuthenticationRequest {
-    string serviceToken = 1;
-}
-
-message ServiceAuthenticationResponse {
-    string serviceId = 1;
-}

@@ -21,8 +21,18 @@ message DataResponse {
     ErrorMessage errorMessage = 1;
 }
 
+message SubmitDataLogRequest {
+    DataRequest dataLogs = 1;
+    string token = 2;
+}
+
+message SubmitDataLogResponse {
+    ErrorMessage errorMessage = 1;
+}
+
 message GetDataLogRequest {
     string username = 1;
+    string token = 2;
 }
 
 message GetDataLogResponse {

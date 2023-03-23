@@ -9,22 +9,31 @@ import "data.proto";
 import "profiler.proto";
 package gateways;
 
-// Profiles
-message GetUserDataRequest {
-    hmsProto.DataRequest request = 1;
-    string authToken = 2;
-}
-
-message GetUserDataResponse {
-    hmsProto.DataResponse response = 1;
-}
-
 // Authentication
 message RegisterUserRequest {
     hmsProto.UserRegistrationRequest request = 1;
-    string serviceToken = 2;
+    string authToken = 2;
 }
 
 message RegisterUserResponse {
     hmsProto.UserRegistrationResponse response = 1;
+}
+
+service Gateways {
+    // Registry Service
+    rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse);
+    rpc AuthenticateUser(hmsProto.UserAuthenticationRequest) returns (hmsProto.UserAuthenticationResponse);
+    rpc LogoutUser(hmsProto.UserLogoutRequest) returns (hmsProto.UserLogoutResponse);
+    rpc DeleteUser(hmsProto.UserDeleteRequest) returns (hmsProto.UserDeleteResponse);
+    // rpc GetUsers() -- Filter by profile
+    // Data Service
+    rpc GetUserData(hmsProto.GetDataLogRequest) returns (hmsProto.GetDataLogResponse);
+    rpc SubmitUserData(hmsProto.SubmitDataLogRequest) returns (hmsProto.SubmitDataLogResponse);
+    // Profiler Service
+    rpc RegisterProfile(hmsProto.RegisterProfileRequest) returns (hmsProto.RegisterProfileResponse);
+    rpc GetProfiles(hmsProto.GetProfilesRequest) returns (hmsProto.GetProfilesResponse);
+    rpc SetUserProfile(hmsProto.SetProfileRequest) returns (hmsProto.SetProfileResponse);
+    // Others
+    // rpc GetRoutes()
+    // rpc SetUserCurrentRoute()
 }
