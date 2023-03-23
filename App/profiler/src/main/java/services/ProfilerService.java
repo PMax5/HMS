@@ -36,6 +36,7 @@ public class ProfilerService {
                 Operations.CONFIG_REQUEST,
                 configRequest.toByteArray()
         );
+        rpcClient.close();
 
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
         System.out.println(configResponse.getServiceConfig());

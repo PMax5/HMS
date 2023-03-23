@@ -39,6 +39,7 @@ public class DataService {
                 Operations.CONFIG_REQUEST,
                 configRequest.toByteArray()
         );
+        rpcClient.close();
 
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
         return new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
