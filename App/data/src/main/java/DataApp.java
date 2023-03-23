@@ -25,6 +25,7 @@ public class DataApp {
             dataServer.addOperationHandler(Operations.SUBMIT_USER_DATALOG, new Operation() {
                 @Override
                 public void execute(String consumerTag, Delivery delivery) throws IOException {
+                    // TODO: Use SubmitLogDataRequest here and then fetch DataRequest, to validate token.
                     Data.DataRequest request = Data.DataRequest.parseFrom(delivery.getBody());
 
                     DataLog dataLog = dataService.submitUserData(
