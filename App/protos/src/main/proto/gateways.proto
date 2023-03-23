@@ -7,7 +7,7 @@ syntax = "proto3";
 import "auth.proto";
 import "data.proto";
 import "profiler.proto";
-package gateways;
+package hmsProto;
 
 // Authentication
 message RegisterUserRequest {
