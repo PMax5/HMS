@@ -45,7 +45,9 @@ public class RegistryService {
         rpcClient.close();
 
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
-        return new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
+        this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
+
+        return this.config;
     }
 
     public void loadHyperledgerService() throws Exception {
