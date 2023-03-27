@@ -54,7 +54,8 @@ message UserAuthenticationRequest {
 message UserAuthenticationResponse {
     string token = 1;
     UserData userdata = 2;
-    ErrorMessage errorMessage = 3;
+    string shiftId = 3;
+    ErrorMessage errorMessage = 4;
 }
 
 message UserAuthorizationRequest {

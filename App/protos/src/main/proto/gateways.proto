@@ -19,6 +19,8 @@ service Gateways {
     // Data Service
     rpc GetUserData(hmsProto.GetDataLogRequest) returns (hmsProto.GetDataLogResponse);
     rpc SubmitUserData(hmsProto.SubmitDataLogRequest) returns (hmsProto.SubmitDataLogResponse);
+    rpc StartShift(hmsProto.StartShiftRequest) returns (hmsProto.StartShiftResponse);
+    rpc EndShift(hmsProto.EndShiftRequest) returns (hmsProto.EndShiftResponse);
     // Profiler Service
     rpc RegisterProfile(hmsProto.RegisterProfileRequest) returns (hmsProto.RegisterProfileResponse);
     rpc GetProfiles(hmsProto.GetProfilesRequest) returns (hmsProto.GetProfilesResponse);

@@ -15,6 +15,7 @@ message DataRequest {
     repeated int32 drowsiness = 5;
     repeated int32 speeds = 6;
     repeated uint64 timestamps = 7;
+    string shiftId = 8;
 }
 
 message DataResponse {
@@ -24,6 +25,7 @@ message DataResponse {
 message SubmitDataLogRequest {
     DataRequest dataLogs = 1;
     string token = 2;
+    string shiftId = 3;
 }
 
 message SubmitDataLogResponse {
@@ -38,4 +40,23 @@ message GetDataLogRequest {
 message GetDataLogResponse {
     repeated DataRequest dataLogs = 1;
     ErrorMessage errorMessage = 2;
+}
+
+message StartShiftRequest {
+    string token = 1;
+    string username = 2;
+}
+
+message StartShiftResponse {
+    string shiftId = 1;
+    ErrorMessage errorMessage = 2;
+}
+
+message EndShiftRequest {
+    string token = 1;
+    string username = 2;
+}
+
+message EndShiftResponse {
+    ErrorMessage errorMessage = 1;
 }
