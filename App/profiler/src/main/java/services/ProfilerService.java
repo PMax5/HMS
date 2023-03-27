@@ -3,6 +3,7 @@ package services;
 import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.RpcClientParams;
+import hmsProto.Auth;
 import models.*;
 import org.hyperledger.fabric.gateway.ContractException;
 
@@ -41,6 +42,37 @@ public class ProfilerService {
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
         System.out.println(configResponse.getServiceConfig());
         return new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
+    }
+
+    public UserRole authorizeUser(String token) {
+        try {
+            String registryQueueName = "service_registry";
+            Channel channel = this.rabbitMqService.createNewChannel();
+            RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), registryQueueName);
+
+            Auth.UserAuthorizationRequest authorizationRequest = Auth.UserAuthorizationRequest.newBuilder()
+                    .setToken(token)
+                    .build();
+
+            final byte[] response = rpcClient.sendRequest(
+                    registryQueueName,
+                    channel,
+                    Operations.AUTHORIZATION_REQUEST,
+                    authorizationRequest.toByteArray()
+            );
+            rpcClient.close();
+
+            Auth.UserAuthorizationResponse authorizationResponse = Auth.UserAuthorizationResponse.parseFrom(response);
+            if (authorizationResponse.hasErrorMessage()) {
+                throw new Exception(authorizationResponse.getErrorMessage().getDescription());
+            }
+
+            return UserRole.valueOf(authorizationResponse.getRole().getValueDescriptor().getName());
+        } catch (Exception e) {
+            System.err.println("[Profiler Service] Failed to authorize user with token \"" + token + "\": "
+                    + e.getMessage());
+            return null;
+        }
     }
 
     public Profile registerProfile(int minAge, int maxAge, String gender, int minHours, int maxHours,

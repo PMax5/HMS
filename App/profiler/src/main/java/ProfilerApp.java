@@ -30,48 +30,57 @@ public class ProfilerApp {
                     Profiler.RegisterProfileRequest request = Profiler.RegisterProfileRequest
                             .parseFrom(delivery.getBody());
 
-                    Profile profile = profilerService.registerProfile(
-                            request.getAgeRange().getMin(),
-                            request.getAgeRange().getMax(),
-                            request.getGender().getValueDescriptor().getName(),
-                            request.getShiftHoursRange().getMin(),
-                            request.getShiftHoursRange().getMax(),
-                            request.getShiftTypesList()
-                                    .stream()
-                                    .map(t -> t.getValueDescriptor().getName())
-                                    .collect(Collectors.toList()),
-                            request.getRouteIdsList()
-                    );
-
+                    UserRole role = profilerService.authorizeUser(request.getToken());
                     Profiler.RegisterProfileResponse.Builder responseBuilder = Profiler.RegisterProfileResponse
                             .newBuilder();
 
-                    if (profile == null) {
-                        responseBuilder.setErrorMessage(Auth.ErrorMessage
-                                .newBuilder()
-                                .setDescription("[Profiler Service] Failed to register profile.")
-                                .build()
-                        );
-                    } else {
-                        responseBuilder.setProfileData(Profiler.Profile.newBuilder()
-                                .setId(profile.getId())
-                                .setAgeRange(Profiler.Interval.newBuilder()
-                                        .setMin(profile.getMinAge())
-                                        .setMax(profile.getMaxAge())
-                                        .build()
-                                )
-                                .setGender(Auth.GENDER.valueOf(profile.getGender().toString()))
-                                .setShiftHoursRange(Profiler.Interval.newBuilder()
-                                        .setMin(profile.getMinShiftHours())
-                                        .setMax(profile.getMaxShiftHours())
-                                        .build()
-                                )
-                                .addAllShiftTypes(profile.getShiftTypes()
+                    if (role.equals(UserRole.SUPERVISOR)) {
+                        Profile profile = profilerService.registerProfile(
+                                request.getAgeRange().getMin(),
+                                request.getAgeRange().getMax(),
+                                request.getGender().getValueDescriptor().getName(),
+                                request.getShiftHoursRange().getMin(),
+                                request.getShiftHoursRange().getMax(),
+                                request.getShiftTypesList()
                                         .stream()
-                                        .map(t -> Profiler.SHIFT_TYPE.valueOf(t.toString()))
-                                        .collect(Collectors.toList())
-                                )
-                                .addAllRouteIds(profile.getRouteIds())
+                                        .map(t -> t.getValueDescriptor().getName())
+                                        .collect(Collectors.toList()),
+                                request.getRouteIdsList()
+                        );
+
+                        if (profile == null) {
+                            responseBuilder.setErrorMessage(Auth.ErrorMessage
+                                    .newBuilder()
+                                    .setDescription("[Profiler Service] Failed to register profile.")
+                                    .build()
+                            );
+                        } else {
+                            responseBuilder.setProfileData(Profiler.Profile.newBuilder()
+                                    .setId(profile.getId())
+                                    .setAgeRange(Profiler.Interval.newBuilder()
+                                            .setMin(profile.getMinAge())
+                                            .setMax(profile.getMaxAge())
+                                            .build()
+                                    )
+                                    .setGender(Auth.GENDER.valueOf(profile.getGender().toString()))
+                                    .setShiftHoursRange(Profiler.Interval.newBuilder()
+                                            .setMin(profile.getMinShiftHours())
+                                            .setMax(profile.getMaxShiftHours())
+                                            .build()
+                                    )
+                                    .addAllShiftTypes(profile.getShiftTypes()
+                                            .stream()
+                                            .map(t -> Profiler.SHIFT_TYPE.valueOf(t.toString()))
+                                            .collect(Collectors.toList())
+                                    )
+                                    .addAllRouteIds(profile.getRouteIds())
+                            );
+                        }
+                    } else {
+                        responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
+                                .setDescription("[Profiler Service] User does not have permissions to register " +
+                                        "new profiles.")
+                                .build()
                         );
                     }
 
@@ -108,43 +117,50 @@ public class ProfilerApp {
                 public void execute(String consumerTag, Delivery delivery) throws IOException {
                     Profiler.GetProfilesRequest request = Profiler.GetProfilesRequest.parseFrom(delivery.getBody());
 
-                    List<Profile> profiles = profilerService.getProfiles();
-
+                    UserRole role = profilerService.authorizeUser(request.getToken());
                     Profiler.GetProfilesResponse.Builder responseBuilder = Profiler.GetProfilesResponse.newBuilder();
 
-                    if (profiles == null) {
+                    if (role.equals(UserRole.SUPERVISOR)) {
+                        List<Profile> profiles = profilerService.getProfiles();
+                        if (profiles == null) {
+                            responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
+                                    .setDescription("[Profiler Service] Failed to get profiles")
+                                    .build()
+                            );
+                        } else {
+                            List<Profiler.Profile> protoProfiles = new ArrayList<>();
+                            for (Profile p : profiles) {
+                                Profiler.Profile protoProfile = Profiler.Profile.newBuilder()
+                                        .setId(p.getId())
+                                        .setAgeRange(Profiler.Interval.newBuilder()
+                                                .setMin(p.getMinAge())
+                                                .setMax(p.getMaxAge())
+                                                .build()
+                                        )
+                                        .setGender(Auth.GENDER.valueOf(p.getGender().toString()))
+                                        .setShiftHoursRange(Profiler.Interval.newBuilder()
+                                                .setMin(p.getMinShiftHours())
+                                                .setMax(p.getMaxShiftHours())
+                                                .build()
+                                        )
+                                        .addAllShiftTypes(p.getShiftTypes()
+                                                .stream()
+                                                .map(t -> Profiler.SHIFT_TYPE.valueOf(t.toString()))
+                                                .collect(Collectors.toList())
+                                        )
+                                        .addAllRouteIds(p.getRouteIds())
+                                        .build();
+
+                                protoProfiles.add(protoProfile);
+                            }
+
+                            responseBuilder.addAllProfiles(protoProfiles);
+                        }
+                    } else {
                         responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
-                                .setDescription("[Profiler Service] Failed to get profiles")
+                                .setDescription("[Profiler Service] User is not authorized to view exisiting profiles.")
                                 .build()
                         );
-                    } else {
-                        List<Profiler.Profile> protoProfiles = new ArrayList<>();
-                        for (Profile p: profiles) {
-                            Profiler.Profile protoProfile = Profiler.Profile.newBuilder()
-                                    .setId(p.getId())
-                                    .setAgeRange(Profiler.Interval.newBuilder()
-                                            .setMin(p.getMinAge())
-                                            .setMax(p.getMaxAge())
-                                            .build()
-                                    )
-                                    .setGender(Auth.GENDER.valueOf(p.getGender().toString()))
-                                    .setShiftHoursRange(Profiler.Interval.newBuilder()
-                                            .setMin(p.getMinShiftHours())
-                                            .setMax(p.getMaxShiftHours())
-                                            .build()
-                                    )
-                                    .addAllShiftTypes(p.getShiftTypes()
-                                            .stream()
-                                            .map(t -> Profiler.SHIFT_TYPE.valueOf(t.toString()))
-                                            .collect(Collectors.toList())
-                                    )
-                                    .addAllRouteIds(p.getRouteIds())
-                                    .build();
-
-                            protoProfiles.add(protoProfile);
-                        }
-
-                        responseBuilder.addAllProfiles(protoProfiles);
                     }
 
                     profilerServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
