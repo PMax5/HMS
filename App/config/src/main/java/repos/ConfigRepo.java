@@ -1,5 +1,8 @@
 package repos;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mongodb.*;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -9,14 +12,19 @@ import com.mongodb.client.result.InsertOneResult;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import static com.mongodb.client.model.Filters.eq;
 
 public class ConfigRepo {
     private final String databaseAddress;
+    private final Gson gson;
     private MongoClient mongoClient;
 
     public ConfigRepo() {
         this.databaseAddress = System.getenv("CONFIG_DATABASE_ADDRESS");
+        this.gson = new Gson();
     }
 
     private MongoDatabase newConnection() {
@@ -36,7 +44,26 @@ public class ConfigRepo {
         return this.mongoClient.getDatabase("configuration");
     }
 
+    private String getServicesChannels() {
+        MongoDatabase mongoDatabase = this.newConnection();
+        MongoCollection<Document> mongoCollection = mongoDatabase.getCollection("configs");
+
+        Map<String, String> serviceChannels = new TreeMap<>();
+
+        mongoCollection.find().forEach(document -> {
+            JsonObject json = JsonParser.parseString(document.getString("serviceConfig")).getAsJsonObject();
+            serviceChannels.put(document.getString("serviceId"), json.get("channelName").getAsString());
+        });
+        this.mongoClient.close();
+
+        return this.gson.toJson(serviceChannels);
+    }
+
     public String getServiceConfig(String serviceId) {
+        if (serviceId.equals("service_gateways")) {
+            return this.getServicesChannels();
+        }
+
         MongoDatabase mongoDatabase = this.newConnection();
         MongoCollection<Document> mongoCollection = mongoDatabase.getCollection("configs");
 
@@ -51,11 +78,13 @@ public class ConfigRepo {
         MongoCollection<Document> mongoCollection = mongoDatabase.getCollection("configs");
 
         try {
-            InsertOneResult result = mongoCollection.insertOne(new Document()
+            mongoCollection.insertOne(new Document()
                     .append("_id", new ObjectId())
                     .append("serviceId", serviceId)
                     .append("serviceConfig", serviceConfig)
             );
+
+            this.mongoClient.close();
         } catch (MongoException e) {
             System.err.println("[Config Repo] Failed to update service configuration. Service: " +
                     serviceId + "; Config: " + serviceConfig);
