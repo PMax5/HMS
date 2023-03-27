@@ -15,6 +15,8 @@ public enum Operations {
     // Data Service
     SUBMIT_USER_DATALOG,
     GET_USER_DATALOGS,
+    START_SHIFT_REQUEST,
+    END_SHIFT_REQUEST,
 
     // Profiler Service
     REGISTER_PROFILE,
