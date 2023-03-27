@@ -3,14 +3,15 @@ package services;
 import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.RpcClientParams;
-import models.Config;
-import models.DataLog;
-import models.Operations;
-import models.RpcClient;
+import hmsProto.Auth;
+import models.*;
 import org.hyperledger.fabric.gateway.ContractException;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -18,15 +19,17 @@ public class DataService {
     private final RabbitMqService rabbitMqService;
     private final HyperledgerService hyperledgerService;
     private final static String SERVICE_ID = "service_data";
+    private Map<String, String> activeShifts;
 
     public DataService(RabbitMqService rabbitMqService) throws Exception {
         this.rabbitMqService = rabbitMqService;
         this.hyperledgerService = new HyperledgerService();
+        this.activeShifts = new HashMap<>();
     }
 
     public Config loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
         String configQueueName = this.rabbitMqService.getRabbitMqConfig().getConfigQueue();
-        Channel channel = rabbitMqService.createNewChannel();
+        Channel channel = this.rabbitMqService.createNewChannel();
         RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), configQueueName);
 
         hmsProto.Config.GetConfigRequest configRequest = hmsProto.Config.GetConfigRequest.newBuilder()
@@ -45,11 +48,66 @@ public class DataService {
         return new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
     }
 
+    public UserRole authorizeUser(String token) {
+        try {
+            String registryQueueName = "service_registry";
+            Channel channel = this.rabbitMqService.createNewChannel();
+            RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), registryQueueName);
+
+            Auth.UserAuthorizationRequest authorizationRequest = Auth.UserAuthorizationRequest.newBuilder()
+                    .setToken(token)
+                    .build();
+
+            final byte[] response = rpcClient.sendRequest(
+                    registryQueueName,
+                    channel,
+                    Operations.AUTHORIZATION_REQUEST,
+                    authorizationRequest.toByteArray()
+            );
+            rpcClient.close();
+
+            Auth.UserAuthorizationResponse authorizationResponse = Auth.UserAuthorizationResponse.parseFrom(response);
+            if (authorizationResponse.hasErrorMessage()) {
+                throw new Exception(authorizationResponse.getErrorMessage().getDescription());
+            }
+
+            return UserRole.valueOf(authorizationResponse.getRole().getValueDescriptor().getName());
+        } catch (Exception e) {
+            System.err.println("[Data Service] Failed to authorize user with token \"" + token + "\": "
+                    + e.getMessage());
+            return null;
+        }
+    }
+
+    public String startShift(String username) {
+        if (this.activeShifts.containsKey(username)) {
+            System.err.println("[Data Service] User " + username + " tried to start a shift that already started.");
+            return null;
+        }
+
+        String shiftId = UUID.randomUUID().toString();
+        this.activeShifts.put(username, shiftId);
+
+        return shiftId;
+    }
+
+    public boolean endShift(String username) {
+        if (!this.activeShifts.containsKey(username)) {
+            System.err.println("[Data Service] User " + username + " tried to end a shift that does not exist.");
+            return false;
+        }
+
+        this.activeShifts.remove(username);
+        return true;
+    }
+
     public DataLog submitUserData(String username, int routeId, int vehicleId, List<Integer> bpmValues,
                                List<Integer> drowsinessValues, List<Integer> speedValues, List<Long> timestampValues) {
         try {
             if (routeId < 0 || vehicleId < 0)
                 throw new Exception("RouteId and/or VehicleId not valid: " + routeId + ", " + vehicleId);
+            else if (!this.activeShifts.containsKey(username))
+                throw new Exception("No active shift was found for user: " + username);
 
             for (int i = 0; i < bpmValues.size(); i++) {
                 int bpmValue = bpmValues.get(i);
@@ -84,7 +142,8 @@ public class DataService {
                     bpmValues,
                     drowsinessValues,
                     speedValues,
-                    timestampValues
+                    timestampValues,
+                    this.activeShifts.get(username)
             );
         } catch (Exception e) {
             System.err.println("[Data Service] Failed to submit data logs for user " + username + ": " + e.getMessage());

@@ -41,7 +41,7 @@ public class HyperledgerService {
     }
 
     public DataLog submitUserData(String username, int routeId, int vehicleId, List<Integer> bpm,
-                               List<Integer> drowsiness, List<Integer> speeds, List<Long> timestamps)
+                               List<Integer> drowsiness, List<Integer> speeds, List<Long> timestamps, String shiftId)
             throws IOException, ContractException, InterruptedException, TimeoutException {
         Gateway gateway = this.getGateway();
         Contract contract = this.getContract(gateway);
@@ -53,7 +53,8 @@ public class HyperledgerService {
                 bpm,
                 drowsiness,
                 speeds,
-                timestamps
+                timestamps,
+                shiftId
         );
 
         contract.submitTransaction("CreateDataLog", String.valueOf(UUID.randomUUID()), this.genson.serialize(dataLog));

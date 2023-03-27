@@ -13,12 +13,14 @@ public class DataLog {
     private final List<Integer> drowsinessValues;
     private final List<Integer> speedValues;
     private final List<Long> timestampValues;
+    private final String shiftId;
 
     public DataLog(@JsonProperty("userId") String userId, @JsonProperty("routeId") int routeId,
                    @JsonProperty("vehicleId") int vehicleId, @JsonProperty("bpmValues") List<Integer> bpm,
                    @JsonProperty("drowsinessValues") List<Integer> drowsiness,
                    @JsonProperty("speedValues") List<Integer> averageSpeed,
-                   @JsonProperty("timestampValues") List<Long> timestamps) {
+                   @JsonProperty("timestampValues") List<Long> timestamps,
+                   @JsonProperty("shiftId") String shiftId) {
         this.userId = userId;
         this.routeId = routeId;
         this.vehicleId = vehicleId;
@@ -26,6 +28,7 @@ public class DataLog {
         this.drowsinessValues = drowsiness;
         this.speedValues = averageSpeed;
         this.timestampValues = timestamps;
+        this.shiftId = shiftId;
     }
 
     public String getUserId() {
@@ -55,4 +58,6 @@ public class DataLog {
     public List<Long> getTimestampValues() {
         return this.timestampValues;
     }
+
+    public String getShiftId() { return this.shiftId; }
 }
