@@ -5,14 +5,12 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.RpcClientParams;
 import hmsProto.Auth;
 import hmsProto.Data;
+import hmsProto.GatewaysGrpc;
 import hmsProto.Profiler;
 import io.grpc.stub.StreamObserver;
 import models.Config;
 import models.Operations;
 import models.RpcClient;
-
-import hmsProto.GatewaysGrpc;
-import hmsProto.GatewaysOuterClass.*;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -183,6 +181,48 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
     }
 
     @Override
+    public void startShift(Data.StartShiftRequest request, StreamObserver<Data.StartShiftResponse> responseObserver) {
+        String serviceQueueName = this.config.getServiceChannel("service_data");
+        try {
+            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            final byte[] response = rpcClient.sendRequest(
+                    serviceQueueName,
+                    rpcClient.getChannel(),
+                    Operations.START_SHIFT_REQUEST,
+                    request.toByteArray()
+            );
+            rpcClient.close();
+
+            responseObserver.onNext(Data.StartShiftResponse.parseFrom(response));
+            responseObserver.onCompleted();
+        } catch (IOException | TimeoutException | ExecutionException | InterruptedException e) {
+            System.err.println("[Gateway Service] An error occurred while submitting data logs for a user: "
+                    + e.getMessage());
+        }
+    }
+
+    @Override
+    public void endShift(Data.EndShiftRequest request, StreamObserver<Data.EndShiftResponse> responseObserver) {
+        String serviceQueueName = this.config.getServiceChannel("service_data");
+        try {
+            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            final byte[] response = rpcClient.sendRequest(
+                    serviceQueueName,
+                    rpcClient.getChannel(),
+                    Operations.END_SHIFT_REQUEST,
+                    request.toByteArray()
+            );
+            rpcClient.close();
+
+            responseObserver.onNext(Data.EndShiftResponse.parseFrom(response));
+            responseObserver.onCompleted();
+        } catch (IOException | TimeoutException | ExecutionException | InterruptedException e) {
+            System.err.println("[Gateway Service] An error occurred while submitting data logs for a user: "
+                    + e.getMessage());
+        }
+    }
+
+    @Override
     public void registerProfile(Profiler.RegisterProfileRequest request,
                                 StreamObserver<Profiler.RegisterProfileResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_profiler");
@@ -247,5 +287,4 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
                     + e.getMessage());
         }
     }
-
 }
