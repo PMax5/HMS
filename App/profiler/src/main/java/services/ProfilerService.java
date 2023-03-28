@@ -14,12 +14,12 @@ import java.util.concurrent.TimeoutException;
 
 public class ProfilerService {
     private final RabbitMqService rabbitMqService;
-    private final HyperledgerService hyperledgerService;
-    private final static String SERVICE_ID = "service_profiler";
+    private final String serviceId;
+    private HyperledgerService hyperledgerService;
 
-    public ProfilerService(RabbitMqService rabbitMqService) throws Exception {
+    public ProfilerService(String serviceId, RabbitMqService rabbitMqService) {
         this.rabbitMqService = rabbitMqService;
-        this.hyperledgerService = new HyperledgerService();
+        this.serviceId = serviceId;
     }
 
     public Config loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
@@ -28,7 +28,7 @@ public class ProfilerService {
         RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), configQueueName);
 
         hmsProto.Config.GetConfigRequest configRequest = hmsProto.Config.GetConfigRequest.newBuilder()
-                .setServiceId(SERVICE_ID)
+                .setServiceId(this.serviceId)
                 .build();
 
         final byte[] response = rpcClient.sendRequest(
@@ -42,6 +42,10 @@ public class ProfilerService {
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
         System.out.println(configResponse.getServiceConfig());
         return new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
+    }
+
+    public void loadHyperLedgerService(Config config) throws Exception {
+        this.hyperledgerService = new HyperledgerService(config);
     }
 
     public UserRole authorizeUser(String token) {

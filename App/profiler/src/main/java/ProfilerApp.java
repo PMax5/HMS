@@ -15,13 +15,15 @@ import java.util.stream.Collectors;
 public class ProfilerApp {
     public static void main(String[] args) {
         try {
+            final String SERVICE_ID = "service_profiler";
             RabbitMqService rabbitMqService = new RabbitMqService();
-            ProfilerService profilerService = new ProfilerService(rabbitMqService);
+            ProfilerService profilerService = new ProfilerService(SERVICE_ID, rabbitMqService);
 
             Config config = profilerService.loadServiceConfig();
             System.out.println("[Profiler App] Initializing server...");
+            profilerService.loadHyperLedgerService(config);
 
-            RpcServer profilerServer = rabbitMqService.newRpcServer(config.getChannelName());
+            RpcServer profilerServer = rabbitMqService.newRpcServer(SERVICE_ID);
             Channel channel = profilerServer.getChannel();
 
             profilerServer.addOperationHandler(Operations.REGISTER_PROFILE, new Operation() {
@@ -172,7 +174,7 @@ public class ProfilerApp {
                 profilerServer.executeOperationHandler(delivery);
             };
 
-            channel.basicConsume(config.getChannelName(), false, mainHandler, (consumerTag -> {}));
+            channel.basicConsume(SERVICE_ID, false, mainHandler, (consumerTag -> {}));
         } catch (Exception e) {
             System.err.println("[Profiler App] Unexpected error occurred: " + e.getMessage());
         }

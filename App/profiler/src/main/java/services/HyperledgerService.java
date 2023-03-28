@@ -2,6 +2,7 @@ package services;
 
 import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
+import models.Config;
 import models.Gender;
 import models.Profile;
 import models.ShiftType;
@@ -22,23 +23,26 @@ public class HyperledgerService {
 
     private final static String PROFILER_USER_ID = "profilerUser";
     private final static String PROFILER_CHANNEL = "profiles";
+    private final static String REGISTRY_CHANNEL = "userdata";
     private final static String PROFILER_CONTRACT = "profiler";
     private final static String REGISTRY_CONTRACT = "registry";
+    private final Config config;
 
-    public HyperledgerService() throws Exception {
+    public HyperledgerService(Config config) throws Exception {
         System.setProperty("org.hyperledger.fabric.sdk.service_discovery.as_localhost", "true");
         this.wallet = Wallets.newFileSystemWallet(Paths.get("wallet"));
         this.genson = new Genson();
+        this.config = config;
     }
 
-    public Contract getContract(Gateway gateway, String contract) {
-        return gateway.getNetwork(PROFILER_CHANNEL).getContract(contract);
+    public Contract getContract(Gateway gateway, String channel, String contract) {
+        return gateway.getNetwork(channel).getContract(contract);
     }
 
     public Gateway getGateway() throws IOException {
         Path networkConfigPath = Paths.get( "resources", "org1.example.com", "connection-org1.json");
         return Gateway.createBuilder()
-                .identity(this.wallet, PROFILER_USER_ID)
+                .identity(this.wallet, this.config.getHyperledgerUserId())
                 .networkConfig(networkConfigPath)
                 .discovery(true)
                 .connect();
@@ -48,7 +52,7 @@ public class HyperledgerService {
                                    List<String> shiftTypes, List<Integer> routeIds) throws IOException,
             ContractException, InterruptedException, TimeoutException {
         Gateway gateway = this.getGateway();
-        Contract contract = this.getContract(gateway, PROFILER_CONTRACT);
+        Contract contract = this.getContract(gateway, PROFILER_CHANNEL, PROFILER_CONTRACT);
 
         List<Integer> ageRange = new ArrayList<>();
         ageRange.add(minAge);
@@ -77,7 +81,7 @@ public class HyperledgerService {
 
     public List<Profile> getProfiles() throws IOException, ContractException {
         Gateway gateway = this.getGateway();
-        Contract contract = this.getContract(gateway, PROFILER_CONTRACT);
+        Contract contract = this.getContract(gateway, PROFILER_CHANNEL, PROFILER_CONTRACT);
 
         byte[] result = contract.evaluateTransaction("GetProfiles");
         gateway.close();
@@ -88,7 +92,7 @@ public class HyperledgerService {
     public void setProfile(String username, String profileId) throws IOException,
             ContractException, InterruptedException, TimeoutException {
         Gateway gateway = this.getGateway();
-        Contract contract = this.getContract(gateway, REGISTRY_CONTRACT);
+        Contract contract = this.getContract(gateway, REGISTRY_CHANNEL, REGISTRY_CONTRACT);
 
         contract.submitTransaction("updateUserProfileId", username, profileId);
         gateway.close();
