@@ -144,13 +144,4 @@ public class RegistryService {
             return false;
         }
     }
-
-    public void registerService(String serviceId) {
-        // TODO: Register service
-    }
-
-    public boolean authenticateService(String serviceToken) {
-        // TODO: Authenticate service
-        return false;
-    }
 }

@@ -11,14 +11,15 @@ import java.io.IOException;
 public class RegistryApp {
     public static void main(String[] args) {
         try {
+            final String SERVICE_ID = "service_config";
             RabbitMqService rabbitMqService = new RabbitMqService();
             RegistryService registryService = new RegistryService(rabbitMqService);
 
-            Config config = registryService.loadServiceConfig();
+            registryService.loadServiceConfig();
             registryService.loadHyperledgerService();
 
             System.out.println("Initializing server...");
-            RpcServer registryServer = rabbitMqService.newRpcServer(config.getChannelName());
+            RpcServer registryServer = rabbitMqService.newRpcServer(SERVICE_ID);
             Channel channel = registryServer.getChannel();
 
             registryServer.addOperationHandler(Operations.NEW_USER_REQUEST, new Operation() {
@@ -174,7 +175,7 @@ public class RegistryApp {
                 registryServer.executeOperationHandler(delivery);
             };
 
-            channel.basicConsume(config.getChannelName(), false, mainHandler, (consumerTag -> {}));
+            channel.basicConsume(SERVICE_ID, false, mainHandler, (consumerTag -> {}));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             System.err.println("[Registry App] Unexpected error occurred: " + e.getMessage());
