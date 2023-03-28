@@ -51,4 +51,23 @@ public final class Data implements ContractInterface {
 
         return queryResults.toArray(new DataLog[0]);
     }
+
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public DataLog[] GetDataLogsForShift(final Context ctx, final String shiftId) {
+        ChaincodeStub stub = ctx.getStub();
+
+        String query = String.format("{ \"selector\": { \"shiftId\": \"%s\" } }", shiftId);
+        QueryResultsIterator<KeyValue> results = stub.getQueryResult(query);
+
+        List<DataLog> queryResults = new ArrayList<>();
+
+        System.out.println("Fetching results...");
+        for (KeyValue result: results) {
+            DataLog dataLog = genson.deserialize(result.getStringValue(), DataLog.class);
+            System.out.println("Result for shiftId: " + dataLog.getShiftId());
+            queryResults.add(dataLog);
+        }
+
+        return queryResults.toArray(new DataLog[0]);
+    }
 }

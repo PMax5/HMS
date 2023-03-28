@@ -33,11 +33,15 @@ public final class DataLog {
     @Property()
     private final Long createdAt;
 
+    @Property()
+    private final String shiftId;
+
     public DataLog(@JsonProperty("userId") final String userId, @JsonProperty("routeId") final String routeId,
                    @JsonProperty("vehicleId") final String vehicleId, @JsonProperty("bpmValues") final List<Integer> bpmValues,
                    @JsonProperty("drowsinessValues") final List<Integer> drowsinessValues,
                    @JsonProperty("speedValues") final List<Integer> speedValues,
-                   @JsonProperty("timestampValues") final List<Long> timestampValues) {
+                   @JsonProperty("timestampValues") final List<Long> timestampValues,
+                   @JsonProperty("shiftId") final String shiftId) {
         this.userId = userId;
         this.routeId = routeId;
         this.vehicleId = vehicleId;
@@ -45,6 +49,7 @@ public final class DataLog {
         this.drowsinessValues = drowsinessValues;
         this.speedValues = speedValues;
         this.timestampValues = timestampValues;
+        this.shiftId = shiftId;
         this.createdAt = Instant.now().getEpochSecond();
     }
 
@@ -76,9 +81,9 @@ public final class DataLog {
         return this.timestampValues;
     }
 
-    public Long getCreatedAt() {
-        return this.createdAt;
-    }
+    public String getShiftId() { return this.shiftId; }
+
+    public Long getCreatedAt() { return this.createdAt; }
 
     @Override
     public int hashCode() {
@@ -90,6 +95,7 @@ public final class DataLog {
                 this.getDrowsinessValues(),
                 this.getSpeedValues(),
                 this.getTimestampValues(),
+                this.getShiftId(),
                 this.getCreatedAt()
         );
     }
