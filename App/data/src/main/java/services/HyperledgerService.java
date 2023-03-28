@@ -77,4 +77,14 @@ public class HyperledgerService {
 
         return this.genson.deserialize(result, new GenericType<List<DataLog>>() {});
     }
+
+    public List<DataLog> getLogsForShift(String shiftId) throws IOException, ContractException {
+        Gateway gateway = this.getGateway();
+        Contract contract = this.getContract(gateway, DATA_CHANNEL, DATA_CONTRACT);
+
+        byte[] result = contract.evaluateTransaction("GetDataLogsForShift", shiftId);
+        gateway.close();
+
+        return this.genson.deserialize(result, new GenericType<List<DataLog>>() {});
+    }
 }
