@@ -17,14 +17,18 @@ import java.util.concurrent.TimeoutException;
 
 public class DataService {
     private final RabbitMqService rabbitMqService;
-    private final HyperledgerService hyperledgerService;
-    private final static String SERVICE_ID = "service_data";
+    private final String serviceId;
+    private HyperledgerService hyperledgerService;
     private Map<String, String> activeShifts;
 
-    public DataService(RabbitMqService rabbitMqService) throws Exception {
+    public DataService(String serviceId, RabbitMqService rabbitMqService) {
+        this.serviceId = serviceId;
         this.rabbitMqService = rabbitMqService;
-        this.hyperledgerService = new HyperledgerService();
         this.activeShifts = new HashMap<>();
+    }
+
+    public void loadHyperledgerService(Config config) throws Exception {
+        this.hyperledgerService = new HyperledgerService(config);
     }
 
     public Config loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
@@ -33,7 +37,7 @@ public class DataService {
         RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), configQueueName);
 
         hmsProto.Config.GetConfigRequest configRequest = hmsProto.Config.GetConfigRequest.newBuilder()
-                .setServiceId(SERVICE_ID)
+                .setServiceId(serviceId)
                 .build();
 
         final byte[] response = rpcClient.sendRequest(
@@ -50,7 +54,7 @@ public class DataService {
 
     public UserRole authorizeUser(String token) {
         try {
-            String registryQueueName = "service_registry";
+            final String registryQueueName = "service_registry";
             Channel channel = this.rabbitMqService.createNewChannel();
             RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), registryQueueName);
 
@@ -100,6 +104,11 @@ public class DataService {
         this.activeShifts.remove(username);
         return true;
     }
+
+    private void processShiftData(String shiftId) {
+        // TODO: Calculate average BPM and drowsiness values.
+    }
+
 
     public DataLog submitUserData(String username, int routeId, int vehicleId, List<Integer> bpmValues,
                                List<Integer> drowsinessValues, List<Integer> speedValues, List<Long> timestampValues) {

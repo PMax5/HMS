@@ -2,6 +2,7 @@ package services;
 
 import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
+import models.Config;
 import models.DataLog;
 import org.hyperledger.fabric.gateway.*;
 
@@ -20,21 +21,25 @@ public class HyperledgerService {
     private final static String DATA_USER_ID = "dataUser";
     private final static String DATA_CHANNEL = "auditlogs";
     private final static String DATA_CONTRACT = "data";
+    private final static String PROCESSED_DATA_CHANNEL = "processed_data";
+    private final static String PROCESSED_DATA_CONTRACT = "pdata";
+    private final Config config;
 
-    public HyperledgerService() throws Exception {
+    public HyperledgerService(Config config) throws Exception {
         System.setProperty("org.hyperledger.fabric.sdk.service_discovery.as_localhost", "true");
         this.wallet = Wallets.newFileSystemWallet(Paths.get("wallet"));
         this.genson = new Genson();
+        this.config = config;
     }
 
-    public Contract getContract(Gateway gateway) {
-        return gateway.getNetwork(DATA_CHANNEL).getContract(DATA_CONTRACT);
+    public Contract getContract(Gateway gateway, String channel, String contract) {
+        return gateway.getNetwork(channel).getContract(contract);
     }
 
     public Gateway getGateway() throws IOException {
         Path networkConfigPath = Paths.get( "resources", "org1.example.com", "connection-org1.json");
         return Gateway.createBuilder()
-                .identity(this.wallet, DATA_USER_ID)
+                .identity(this.wallet, this.config.getHyperledgerUserId())
                 .networkConfig(networkConfigPath)
                 .discovery(true)
                 .connect();
@@ -44,7 +49,7 @@ public class HyperledgerService {
                                List<Integer> drowsiness, List<Integer> speeds, List<Long> timestamps, String shiftId)
             throws IOException, ContractException, InterruptedException, TimeoutException {
         Gateway gateway = this.getGateway();
-        Contract contract = this.getContract(gateway);
+        Contract contract = this.getContract(gateway, DATA_CHANNEL, DATA_CONTRACT);
 
         DataLog dataLog = new DataLog(
                 username,
@@ -65,7 +70,7 @@ public class HyperledgerService {
 
     public List<DataLog> getLogsForUser(String username) throws IOException, ContractException {
         Gateway gateway = this.getGateway();
-        Contract contract = this.getContract(gateway);
+        Contract contract = this.getContract(gateway, DATA_CHANNEL, DATA_CONTRACT);
 
         byte[] result = contract.evaluateTransaction("GetDataLogsForUser", username);
         gateway.close();

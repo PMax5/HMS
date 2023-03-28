@@ -14,13 +14,15 @@ import java.util.stream.Collectors;
 public class DataApp {
     public static void main(String[] args) {
         try {
+            final String SERVICE_ID = "service_data";
             RabbitMqService rabbitMqService = new RabbitMqService();
-            DataService dataService = new DataService(rabbitMqService);
+            DataService dataService = new DataService(SERVICE_ID, rabbitMqService);
 
             Config config = dataService.loadServiceConfig();
             System.out.println("[Data App] Initializing server...");
+            dataService.loadHyperledgerService(config);
 
-            RpcServer dataServer = rabbitMqService.newRpcServer(config.getChannelName());
+            RpcServer dataServer = rabbitMqService.newRpcServer(SERVICE_ID);
             Channel channel = dataServer.getChannel();
 
             dataServer.addOperationHandler(Operations.SUBMIT_USER_DATALOG, new Operation() {
@@ -171,7 +173,7 @@ public class DataApp {
                 dataServer.executeOperationHandler(delivery);
             };
 
-            channel.basicConsume(config.getChannelName(), false, mainHandler, (consumerTag -> {}));
+            channel.basicConsume(SERVICE_ID, false, mainHandler, (consumerTag -> {}));
         } catch (Exception e) {
             System.err.println("[Data App] Unexpected error occurred: " + e.getMessage());
         }
