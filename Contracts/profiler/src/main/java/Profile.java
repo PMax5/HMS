@@ -8,10 +8,20 @@ public class Profile {
 
     @Property()
     private final String id;
+
+    @Property()
     private final List<Integer> ageRage;
+
+    @Property()
     private final String gender;
+
+    @Property()
     private final List<Integer> shiftHoursRage;
+
+    @Property()
     private final List<String> shiftTypes;
+
+    @Property()
     private final List<Integer> routeIds;
 
     public Profile(@JsonProperty("id") String id, @JsonProperty("ageRange") List<Integer> ageRage,
