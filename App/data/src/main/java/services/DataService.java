@@ -8,18 +8,16 @@ import models.*;
 import org.hyperledger.fabric.gateway.ContractException;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DataService {
     private final RabbitMqService rabbitMqService;
     private final String serviceId;
     private HyperledgerService hyperledgerService;
-    private Map<String, String> activeShifts;
+    private Map<String, Shift> activeShifts;
 
     public DataService(String serviceId, RabbitMqService rabbitMqService) {
         this.serviceId = serviceId;
@@ -83,32 +81,81 @@ public class DataService {
         }
     }
 
-    public String startShift(String username) {
+    public String startShift(String username, int routeId, int vehicleId) {
         if (this.activeShifts.containsKey(username)) {
             System.err.println("[Data Service] User " + username + " tried to start a shift that already started.");
             return null;
         }
 
         String shiftId = UUID.randomUUID().toString();
-        this.activeShifts.put(username, shiftId);
+        this.activeShifts.put(username, new Shift(
+                username,
+                shiftId,
+                routeId,
+                vehicleId
+        ));
 
         return shiftId;
     }
 
-    public boolean endShift(String username) {
+    public ShiftLog endShift(String username) {
         if (!this.activeShifts.containsKey(username)) {
             System.err.println("[Data Service] User " + username + " tried to end a shift that does not exist.");
-            return false;
+            return null;
         }
 
+        ShiftLog shiftLog = this.processShiftData(this.activeShifts.get(username));
         this.activeShifts.remove(username);
-        return true;
+        return shiftLog;
     }
 
-    private void processShiftData(String shiftId) {
-        // TODO: Calculate average BPM and drowsiness values.
+    private ShiftLog processShiftData(Shift shift) {
+        try {
+            List<DataLog> dataLogs = this.hyperledgerService.getLogsForShift(shift.getShiftId());
+
+            AtomicInteger totalBpmValues = new AtomicInteger();
+            AtomicInteger totalDrowsinessValues = new AtomicInteger();
+            AtomicInteger totalSpeedValues = new AtomicInteger();
+
+            AtomicInteger totalBpm = new AtomicInteger();
+            AtomicInteger totalDrowsiness = new AtomicInteger();
+            AtomicInteger totalSpeed = new AtomicInteger();
+
+            dataLogs.forEach(log -> {
+                log.getBpmValues().forEach(totalBpm::addAndGet);
+                log.getDrowsinessValues().forEach(totalDrowsiness::addAndGet);
+                log.getSpeedValues().forEach(totalSpeed::addAndGet);
+
+                totalBpmValues.addAndGet(log.getBpmValues().size());
+                totalDrowsinessValues.addAndGet(log.getDrowsinessValues().size());
+                totalSpeedValues.addAndGet(log.getSpeedValues().size());
+
+            });
+
+            return this.hyperledgerService.submitShiftLogData(
+                    shift.getUserId(),
+                    shift.getShiftId(),
+                    shift.getVehicleId(),
+                    shift.getRouteId(),
+                    totalBpm.get() / totalBpmValues.get(),
+                    totalDrowsiness.get() / totalDrowsinessValues.get(),
+                    totalSpeed.get() / totalSpeedValues.get()
+            );
+        } catch (ContractException | IOException | InterruptedException | TimeoutException e) {
+            System.err.println("[Data Service] Failed to process data logs for user " + shift.getUserId() +
+                    ": " + e.getMessage());
+            return null;
+        }
     }
 
+    public List<ShiftLog> getShiftLogsForUser(String userId) {
+        try {
+            return this.hyperledgerService.getShiftLogsForUser(userId);
+        } catch (ContractException | IOException e) {
+            System.err.println("[Data Service] Failed to get data logs for user " + userId + ": " + e.getMessage());
+            return null;
+        }
+    }
 
     public DataLog submitUserData(String username, int routeId, int vehicleId, List<Integer> bpmValues,
                                List<Integer> drowsinessValues, List<Integer> speedValues, List<Long> timestampValues) {
@@ -152,7 +199,7 @@ public class DataService {
                     drowsinessValues,
                     speedValues,
                     timestampValues,
-                    this.activeShifts.get(username)
+                    this.activeShifts.get(username).getShiftId()
             );
         } catch (Exception e) {
             System.err.println("[Data Service] Failed to submit data logs for user " + username + ": " + e.getMessage());

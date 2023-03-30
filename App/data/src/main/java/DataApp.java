@@ -115,7 +115,11 @@ public class DataApp {
                     Data.StartShiftResponse.Builder responseBuilder = Data.StartShiftResponse.newBuilder();
 
                     if (role.equals(UserRole.DRIVER)) {
-                        String shiftId = dataService.startShift(request.getUsername());
+                        String shiftId = dataService.startShift(
+                                request.getUsername(),
+                                request.getRouteId(),
+                                request.getVehicleId()
+                        );
 
                         if (shiftId != null) {
                             responseBuilder.setShiftId(shiftId);
@@ -148,8 +152,8 @@ public class DataApp {
                     Data.EndShiftResponse.Builder responseBuilder = Data.EndShiftResponse.newBuilder();
 
                     if (role.equals(UserRole.DRIVER)) {
-                        boolean success = dataService.endShift(request.getUsername());
-                        if (!success) {
+                        ShiftLog shiftLog = dataService.endShift(request.getUsername());
+                        if (shiftLog == null) {
                             responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
                                     .setDescription("[Data Service] User " + request.getUsername() + " is not allowed to end"
                                             + " a shift that does not exist.")
@@ -165,6 +169,39 @@ public class DataApp {
                     }
 
                     dataServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
+                }
+            });
+
+            dataServer.addOperationHandler(Operations.GET_USER_SHIFTLOGS, new Operation() {
+                @Override
+                public void execute(String consumerTag, Delivery delivery) throws IOException {
+                    Data.GetShiftLogsRequest request = Data.GetShiftLogsRequest.parseFrom(delivery.getBody());
+
+                    List<ShiftLog> shiftLogs = dataService.getShiftLogsForUser(request.getUsername());
+                    Data.GetShiftLogsResponse.Builder responseBuilder = Data.GetShiftLogsResponse.newBuilder();
+
+                    if (shiftLogs == null) {
+                        responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
+                                .setDescription("[Data Service] Failed to fetch shift logs for user " +
+                                        request.getUsername())
+                                .build()
+                        );
+                    } else {
+                        responseBuilder.addAllShiftLog(shiftLogs
+                                .stream()
+                                .map(s -> Data.ShiftLog.newBuilder()
+                                        .setUserId(s.getUserId())
+                                        .setShiftId(s.getShiftId())
+                                        .setVehicleId(s.getVehicleId())
+                                        .setRouteId(s.getRouteId())
+                                        .setAverageBPM(s.getAverageBPM())
+                                        .setAverageDrowsiness(s.getAverageDrowsiness())
+                                        .setAverageSpeed(s.getAverageSpeed())
+                                        .build()
+                                )
+                                .collect(Collectors.toList())
+                        );
+                    }
                 }
             });
 
