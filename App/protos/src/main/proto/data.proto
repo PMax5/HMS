@@ -18,6 +18,16 @@ message DataRequest {
     string shiftId = 8;
 }
 
+message ShiftLog {
+    string userId = 1;
+    string shiftId = 2;
+    int32 vehicleId = 3;
+    int32 routeId = 4;
+    int32 averageBPM = 5;
+    int32 averageDrowsiness = 6;
+    int32 averageSpeed = 7;
+}
+
 message DataResponse {
     ErrorMessage errorMessage = 1;
 }
@@ -45,6 +55,8 @@ message GetDataLogResponse {
 message StartShiftRequest {
     string token = 1;
     string username = 2;
+    int32 routeId = 3;
+    int32 vehicleId = 4;
 }
 
 message StartShiftResponse {
@@ -59,4 +71,13 @@ message EndShiftRequest {
 
 message EndShiftResponse {
     ErrorMessage errorMessage = 1;
+}
+
+message GetShiftLogsRequest {
+    string username = 1;
+}
+
+message GetShiftLogsResponse {
+    repeated ShiftLog shiftLog = 1;
+    ErrorMessage errorMessage = 2;
 }
