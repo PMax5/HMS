@@ -20,13 +20,11 @@ public class HyperledgerService {
 
     private final Wallet wallet;
     private final Genson genson;
-
-    private final static String PROFILER_USER_ID = "profilerUser";
+    private final Config config;
     private final static String PROFILER_CHANNEL = "profiles";
     private final static String REGISTRY_CHANNEL = "userdata";
     private final static String PROFILER_CONTRACT = "profiler";
     private final static String REGISTRY_CONTRACT = "registry";
-    private final Config config;
 
     public HyperledgerService(Config config) throws Exception {
         System.setProperty("org.hyperledger.fabric.sdk.service_discovery.as_localhost", "true");
@@ -63,7 +61,6 @@ public class HyperledgerService {
         shiftHoursRange.add(maxShiftHours);
 
         String uuid = String.valueOf(UUID.randomUUID());
-
         Profile profile = new Profile(
                 uuid,
                 ageRange,
