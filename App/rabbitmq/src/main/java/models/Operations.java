@@ -17,6 +17,7 @@ public enum Operations {
     GET_USER_DATALOGS,
     START_SHIFT_REQUEST,
     END_SHIFT_REQUEST,
+    GET_USER_SHIFTLOGS,
 
     // Profiler Service
     REGISTER_PROFILE,
