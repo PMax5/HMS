@@ -22,5 +22,6 @@ public enum Operations {
     // Profiler Service
     REGISTER_PROFILE,
     SET_USER_PROFILE,
-    GET_PROFILES
+    ANALYZE_PROFILE,
+    GET_PROFILES,
 }
