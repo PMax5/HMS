@@ -203,18 +203,55 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
 
     @Override
     public void endShift(Data.EndShiftRequest request, StreamObserver<Data.EndShiftResponse> responseObserver) {
-        String serviceQueueName = this.config.getServiceChannel("service_data");
+        String dataServiceQueueName = this.config.getServiceChannel("service_data");
+        String profilerServiceQueueName = this.config.getServiceChannel("service_profiler");
         try {
-            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
-            final byte[] response = rpcClient.sendRequest(
-                    serviceQueueName,
+            System.out.println("[Gateway Service] Ending shift for user " + request.getUsername());
+            RpcClient rpcClient = this.getRpcClient(dataServiceQueueName);
+            final byte[] dataResponse = rpcClient.sendRequest(
+                    dataServiceQueueName,
                     rpcClient.getChannel(),
                     Operations.END_SHIFT_REQUEST,
                     request.toByteArray()
             );
+
+            Data.GetShiftLogsRequest shiftLogsRequest = Data.GetShiftLogsRequest.newBuilder()
+                    .setUsername(request.getUsername())
+                    .build();
+
+            System.out.println("[Gateway Service] Fetching shift logs for user " + request.getUsername());
+            final byte[] shiftLogsResponseBytes = rpcClient.sendRequest(
+                    dataServiceQueueName,
+                    rpcClient.getChannel(),
+                    Operations.GET_USER_SHIFTLOGS,
+                    shiftLogsRequest.toByteArray()
+            );
+
+            Data.GetShiftLogsResponse shiftLogsResponse = Data.GetShiftLogsResponse.parseFrom(shiftLogsResponseBytes);
+            Profiler.AnalyzeProfileRequest analyzeProfileRequest = Profiler.AnalyzeProfileRequest.newBuilder()
+                    .addAllShiftLogs(shiftLogsResponse.getShiftLogList())
+                    .setUsername(request.getUsername())
+                    .build();
+
+            System.out.println("[Gateway Service] Send shift logs to Profiler Service for user "
+                    + request.getUsername());
+            final byte[] analyzeProfileResponseBytes = rpcClient.sendRequest(
+                    profilerServiceQueueName,
+                    rpcClient.getChannel(),
+                    Operations.ANALYZE_PROFILE,
+                    analyzeProfileRequest.toByteArray()
+            );
+
+            Profiler.AnalyzeProfileResponse analyzeProfileResponse = Profiler.AnalyzeProfileResponse
+                    .parseFrom(analyzeProfileResponseBytes);
+
+            if (analyzeProfileResponse.hasErrorMessage()) {
+                System.err.println("[Gateway Service] An error occurred while analyzing the user's profile: " +
+                        analyzeProfileResponse.getErrorMessage().getDescription());
+            }
             rpcClient.close();
 
-            responseObserver.onNext(Data.EndShiftResponse.parseFrom(response));
+            responseObserver.onNext(Data.EndShiftResponse.parseFrom(dataResponse));
             responseObserver.onCompleted();
         } catch (IOException | TimeoutException | ExecutionException | InterruptedException e) {
             System.err.println("[Gateway Service] An error occurred while submitting data logs for a user: "
