@@ -41,7 +41,7 @@ public class ConfigRepo {
 
 
         this.mongoClient = MongoClients.create(settings);
-        return this.mongoClient.getDatabase("configuration");
+        return this.mongoClient.getDatabase("hms");
     }
 
     private String getServicesChannels() {
