@@ -6,19 +6,28 @@ import com.rabbitmq.client.RpcClientParams;
 import hmsProto.Auth;
 import models.*;
 import org.hyperledger.fabric.gateway.ContractException;
+import repos.RoutesRepo;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ProfilerService {
     private final RabbitMqService rabbitMqService;
+    private final RoutesRepo routesRepo;
     private final String serviceId;
     private HyperledgerService hyperledgerService;
+    private Config config;
 
     public ProfilerService(String serviceId, RabbitMqService rabbitMqService) {
         this.rabbitMqService = rabbitMqService;
+        this.routesRepo = new RoutesRepo();
         this.serviceId = serviceId;
     }
 
@@ -41,7 +50,8 @@ public class ProfilerService {
 
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
         System.out.println(configResponse.getServiceConfig());
-        return new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
+        this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
+        return this.config;
     }
 
     public void loadHyperLedgerService(Config config) throws Exception {
@@ -80,7 +90,7 @@ public class ProfilerService {
     }
 
     public Profile registerProfile(int minAge, int maxAge, String gender, int minHours, int maxHours,
-                                List<String> shiftTypes, List<Integer> routeIds) {
+                                List<String> shiftTypes, List<Integer> routeIds, List<String> routeCharacteristics) {
         try {
             return this.hyperledgerService.registerProfile(
                     minAge,
@@ -89,7 +99,8 @@ public class ProfilerService {
                     minHours,
                     maxHours,
                     shiftTypes,
-                    routeIds
+                    routeIds,
+                    routeCharacteristics
             );
         } catch (IOException | ContractException | InterruptedException | TimeoutException e) {
             System.err.println("[Profiler Service] Failed to register profile: " + e.getMessage());
@@ -117,7 +128,138 @@ public class ProfilerService {
         }
     }
 
-    public void analyizeDriverData(String username) {
-        // TODO: Implement this method
+    private Profile getUserProfile(String username, List<Profile> profiles) throws IOException, ContractException,
+            InterruptedException, TimeoutException {
+        String profileId = this.hyperledgerService.getUserProfile(username);
+        for (Profile profile: profiles) {
+            if (profile.getId().equals(profileId)) {
+                return profile;
+            }
+        }
+
+        return null;
+    }
+
+    private Profile getProfileForRouteCharacteristic(List<Profile> profiles, RouteCharacteristic routeCharacteristic) {
+        // TODO: Implement this method.
+        return null;
+    }
+
+    private Profile getProfileForShiftType(List<Profile> profiles, ShiftType shiftType) {
+        // TODO: Implement this method.
+        return null;
+    }
+
+    private RouteCharacteristic getMostFrequentRouteCharacteristic(
+            Map<RouteCharacteristic, Integer> characteristicsFrequency) {
+        AtomicReference<RouteCharacteristic> mostFrequentCharacteristic = new AtomicReference<>();
+        AtomicInteger maxFrequency = new AtomicInteger();
+        characteristicsFrequency.forEach((key, value) -> {
+            if (maxFrequency.get() == 0) {
+                maxFrequency.set(value);
+                mostFrequentCharacteristic.set(key);
+            } else if (maxFrequency.get() < value) {
+                maxFrequency.set(value);
+                mostFrequentCharacteristic.set(key);
+            }
+        });
+
+        return mostFrequentCharacteristic.get();
+    }
+
+    public void analyizeDriverData(String username, String lastShiftId, List<ShiftLog> shiftLogs) {
+        ShiftLog lastShiftLog = null;
+        List<ShiftLog> problematicShiftsBPM = new ArrayList<>();
+        List<ShiftLog> problematicShiftsDrowsiness = new ArrayList<>();
+        Map<Integer, Route> shiftRoutes = new HashMap<>();
+        Map<RouteCharacteristic, Integer> characteristicsFrequencyBPM = new HashMap<>();
+        Map<RouteCharacteristic, Integer> characteristicsFrequencyDrowsiness = new HashMap<>();
+        List<Profile> profiles = this.getProfiles();
+
+        try {
+            for (ShiftLog shiftLog : shiftLogs) {
+                if (shiftLog.getShiftId().equals(lastShiftId)) {
+                    lastShiftLog = shiftLog;
+                }
+
+                final int routeId = shiftLog.getRouteId();
+                Route route = this.routesRepo.getRoute(routeId);
+                if (shiftLog.getAverageBPM() > this.config.getMaxHealthyBPM()) {
+                    problematicShiftsBPM.add(shiftLog);
+                    shiftRoutes.put(routeId, route);
+                    route.getCharacteristics().forEach(routeCharacteristic -> {
+                        if (!characteristicsFrequencyBPM.containsKey(routeCharacteristic)) {
+                            characteristicsFrequencyBPM.put(routeCharacteristic, 1);
+                        } else {
+                            characteristicsFrequencyBPM.put(routeCharacteristic,
+                                    characteristicsFrequencyBPM.get(routeCharacteristic) + 1);
+                        }
+                    });
+                } else if (shiftLog.getAverageDrowsiness() > this.config.getMaxDrowsiness()) {
+                    shiftRoutes.put(routeId, route);
+                    route.getCharacteristics().forEach(routeCharacteristic -> {
+                        if (!characteristicsFrequencyDrowsiness.containsKey(routeCharacteristic)) {
+                            characteristicsFrequencyDrowsiness.put(routeCharacteristic, 1);
+                        } else {
+                            characteristicsFrequencyDrowsiness.put(routeCharacteristic,
+                                    characteristicsFrequencyDrowsiness.get(routeCharacteristic) + 1);
+                        }
+                    });
+                    problematicShiftsDrowsiness.add(shiftLog);
+                }
+            }
+
+            if (lastShiftLog != null) {
+                Profile userProfile = this.getUserProfile(username, profiles);
+                if (userProfile != null) {
+                    if (lastShiftLog.getAverageBPM() > this.config.getMaxHealthyBPM() &&
+                            problematicShiftsBPM.size() > this.config.getMaxProblematicShifts()) {
+                        for (ShiftType shiftType: userProfile.getShiftTypes()) {
+                            if (shiftType.equals(ShiftType.SHIFT_MORNING) ||
+                                    shiftType.equals(ShiftType.SHIFT_AFTERNOON)) {
+                                userProfile = this.getProfileForShiftType(profiles, ShiftType.SHIFT_NIGHT);
+                                this.setProfile(username, userProfile.getId());
+                                return;
+                            }
+                        }
+
+                        switch (this.getMostFrequentRouteCharacteristic(characteristicsFrequencyBPM)) {
+                            case HIGH_TRAFFIC -> userProfile = this.getProfileForRouteCharacteristic(profiles,
+                                    RouteCharacteristic.LOW_TRAFFIC);
+                            case THIN_ROADS -> userProfile = this.getProfileForRouteCharacteristic(profiles,
+                                    RouteCharacteristic.LARGE_ROADS);
+                            case CRIMINAL_AREA -> userProfile = this.getProfileForRouteCharacteristic(profiles,
+                                    RouteCharacteristic.REGULAR_AREA);
+                        }
+                    } else if (lastShiftLog.getAverageDrowsiness() > this.config.getMaxDrowsiness() &&
+                            problematicShiftsDrowsiness.size() > this.config.getMaxProblematicShifts()) {
+                        for (ShiftType shiftType: userProfile.getShiftTypes()) {
+                            if (shiftType.equals(ShiftType.SHIFT_NIGHT)) {
+                                userProfile = this.getProfileForShiftType(profiles, ShiftType.SHIFT_MORNING);
+                                this.setProfile(username, userProfile.getId());
+                                return;
+                            }
+                        }
+
+                        switch (this.getMostFrequentRouteCharacteristic(characteristicsFrequencyDrowsiness)) {
+                            case LOW_TRAFFIC -> userProfile = this.getProfileForRouteCharacteristic(profiles,
+                                    RouteCharacteristic.HIGH_TRAFFIC);
+                            case LARGE_ROADS -> userProfile = this.getProfileForRouteCharacteristic(profiles,
+                                    RouteCharacteristic.THIN_ROADS);
+                            case REGULAR_AREA -> userProfile = this.getProfileForRouteCharacteristic(profiles,
+                                    RouteCharacteristic.CRIMINAL_AREA);
+                        }
+                    }
+
+                    this.setProfile(username, userProfile.getId());
+                } else {
+                    System.err.println("[Profiler Service] Wasn't able to fetch current user profile.");
+                }
+            } else {
+                System.err.println("[Profiler Service] There is no shift with the specified last shift id.");
+            }
+        } catch (Exception e) {
+            System.err.println("[Profiler Service] Failed to get routes for one of the driver's shifts.");
+        }
     }
 }
