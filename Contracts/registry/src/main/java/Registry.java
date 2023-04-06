@@ -94,12 +94,19 @@ public final class Registry implements ContractInterface {
     }
 
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public User updateUserProfileId(final Context ctx, final String username, final int profileId) {
+    public User updateUserProfileId(final Context ctx, final String username, final String profileId) {
         User user = this.queryUser(ctx, username);
         user.setProfileId(profileId);
 
         ctx.getStub().putStringState(username, genson.serialize(user));
         return user;
+    }
+
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public String getUserProfile(final Context ctx, final String username) {
+        User user = this.queryUser(ctx, username);
+
+        return user.getProfileId();
     }
 
     @Transaction(intent = Transaction.TYPE.SUBMIT)

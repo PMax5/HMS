@@ -32,7 +32,7 @@ public final class User {
     private final String hashedPassword;
 
     @Property()
-    private int profileId;
+    private String profileId;
 
     @Property()
     private final List<Integer> routeIds;
@@ -71,7 +71,7 @@ public final class User {
         return this.role;
     }
 
-    public int getProfileId() {
+    public String getProfileId() {
         return this.profileId;
     }
 
@@ -95,7 +95,7 @@ public final class User {
         this.routeIds.remove(routeId);
     }
 
-    public void setProfileId(int profileId) {
+    public void setProfileId(String profileId) {
         this.profileId = profileId;
     }
 
