@@ -1,11 +1,13 @@
 package repos;
 
+import com.google.gson.Gson;
 import com.mongodb.*;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.InsertOneResult;
+import models.Route;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -19,7 +21,7 @@ public class RoutesRepo {
         this.databaseAddress = System.getenv("CONFIG_DATABASE_ADDRESS");
     }
 
-    private MongoDatabase newConnection(String database) {
+    private MongoDatabase newConnection() {
         String uri = "mongodb://" + this.databaseAddress + "/?retryWrites=true&w=majority";
 
         ServerApi serverApi = ServerApi.builder()
@@ -33,16 +35,20 @@ public class RoutesRepo {
 
 
         this.mongoClient = MongoClients.create(settings);
-        return this.mongoClient.getDatabase(database);
+        return this.mongoClient.getDatabase("hms");
     }
 
-    public String getRoutes(String serviceId) {
-        MongoDatabase mongoDatabase = this.newConnection("routes");
-        MongoCollection<Document> mongoCollection = mongoDatabase.getCollection("configs");
+    public Route getRoute(int routeId) throws Exception {
+        MongoDatabase mongoDatabase = this.newConnection();
+        MongoCollection<Document> mongoCollection = mongoDatabase.getCollection("routes");
 
-        Document document = mongoCollection.find(eq("serviceId", serviceId)).first();
+        Document document = mongoCollection.find(eq("routeId", routeId)).first();
         this.mongoClient.close();
 
-        return document != null ? document.getString("serviceConfig") : "{}";
+        if (document == null) {
+            throw new Exception("[Routes Repo] Failed to get route with ID " + routeId);
+        }
+
+        return new Gson().fromJson(document.toJson(), Route.class);
     }
 }
