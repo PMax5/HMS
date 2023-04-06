@@ -47,7 +47,8 @@ public class HyperledgerService {
     }
 
     public Profile registerProfile(int minAge, int maxAge, String gender, int minShiftHours, int maxShiftHours,
-                                   List<String> shiftTypes, List<Integer> routeIds) throws IOException,
+                                   List<String> shiftTypes, List<Integer> routeIds,
+                                   List<String> routeCharacteristics) throws IOException,
             ContractException, InterruptedException, TimeoutException {
         Gateway gateway = this.getGateway();
         Contract contract = this.getContract(gateway, PROFILER_CHANNEL, PROFILER_CONTRACT);
@@ -67,7 +68,8 @@ public class HyperledgerService {
                 gender,
                 shiftHoursRange,
                 shiftTypes,
-                routeIds
+                routeIds,
+                routeCharacteristics
         );
 
         contract.submitTransaction("CreateProfile", uuid, this.genson.serialize(profile));
@@ -93,5 +95,16 @@ public class HyperledgerService {
 
         contract.submitTransaction("updateUserProfileId", username, profileId);
         gateway.close();
+    }
+
+    public String getUserProfile(String username) throws IOException,
+            ContractException, InterruptedException, TimeoutException {
+        Gateway gateway = this.getGateway();
+        Contract contract = this.getContract(gateway, REGISTRY_CHANNEL, REGISTRY_CONTRACT);
+
+        byte[] result = contract.evaluateTransaction("getUserProfile", username);
+        gateway.close();
+
+        return this.genson.deserialize(result, String.class);
     }
 }
