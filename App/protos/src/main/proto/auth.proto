@@ -35,6 +35,7 @@ message UserData {
     ROLE role = 5;
     string profileId = 6;
     repeated int32 routeIds = 7;
+    int64 timestamp = 8;
 }
 
 message ErrorMessage {

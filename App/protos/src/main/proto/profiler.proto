@@ -47,6 +47,7 @@ message Profile {
     Interval shiftHoursRange = 4;
     repeated SHIFT_TYPE shiftTypes = 5;
     repeated int32 routeIds = 6;
+    repeated ROUTE_CHARACTERISTIC routeCharacteristics = 7;
 }
 
 message Route {
@@ -64,6 +65,7 @@ message RegisterProfileRequest {
     repeated SHIFT_TYPE shiftTypes = 4;
     repeated int32 routeIds = 5;
     string token = 6;
+    repeated ROUTE_CHARACTERISTIC routeCharacteristics = 7;
 }
 
 message RegisterProfileResponse {
@@ -91,7 +93,8 @@ message SetProfileResponse {
 
 message AnalyzeProfileRequest {
     string username = 1;
-    repeated hmsProto.ShiftLog shiftLogs = 2;
+    string lastShiftId = 2;
+    repeated hmsProto.ShiftLog shiftLogs = 3;
 }
 
 message AnalyzeProfileResponse {

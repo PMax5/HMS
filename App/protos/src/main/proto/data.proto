@@ -70,7 +70,8 @@ message EndShiftRequest {
 }
 
 message EndShiftResponse {
-    ErrorMessage errorMessage = 1;
+    string lastShiftId = 1;
+    ErrorMessage errorMessage = 2;
 }
 
 message GetShiftLogsRequest {
