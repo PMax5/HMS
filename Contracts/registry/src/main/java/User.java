@@ -32,15 +32,20 @@ public final class User {
     private final String hashedPassword;
 
     @Property()
+    private final List<Integer> routeIds;
+
+    @Property()
     private String profileId;
 
     @Property()
-    private final List<Integer> routeIds;
+    private long timestamp;
+
 
     public User(@JsonProperty("name") final String name, @JsonProperty("username") final String username,
                 @JsonProperty("age") final int age, @JsonProperty("gender") final String gender,
                 @JsonProperty("role") final String role,
-                @JsonProperty("hashedPassword") final String hashedPassword) {
+                @JsonProperty("hashedPassword") final String hashedPassword,
+                @JsonProperty("timestamp") final long timestamp) {
         this.name = name;
         this.username = username;
         this.age = age;
@@ -49,6 +54,7 @@ public final class User {
         this.createdAt = Instant.now().getEpochSecond();
         this.routeIds = new ArrayList<>();
         this.hashedPassword = hashedPassword;
+        this.timestamp = timestamp;
     }
 
     public String getName() {
@@ -99,6 +105,12 @@ public final class User {
         this.profileId = profileId;
     }
 
+    public long getTimestamp() { return this.timestamp; }
+
+    public void setTimestamp(Instant instant) {
+        this.timestamp = Instant.now().getEpochSecond();
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(
@@ -109,7 +121,8 @@ public final class User {
                 this.getRole(),
                 this.getProfileId(),
                 this.getRouteIds(),
-                this.getCreatedAt()
+                this.getCreatedAt(),
+                this.getTimestamp()
         );
     }
 }

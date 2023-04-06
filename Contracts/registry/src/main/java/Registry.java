@@ -7,6 +7,7 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
 import org.hyperledger.fabric.shim.ledger.KeyValue;
 import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +55,7 @@ public final class Registry implements ContractInterface {
             throw new ChaincodeException("User " + username + " already exists.", UserRegistryErrors.USER_ALREADY_EXISTS.toString());
         }
 
-        User user = new User(name, username, age, gender, role, hashedPassword);
+        User user = new User(name, username, age, gender, role, hashedPassword, Instant.now().getEpochSecond());
         userState = genson.serialize(user);
         stub.putStringState(username, userState);
 
@@ -97,6 +98,7 @@ public final class Registry implements ContractInterface {
     public User updateUserProfileId(final Context ctx, final String username, final String profileId) {
         User user = this.queryUser(ctx, username);
         user.setProfileId(profileId);
+        user.setTimestamp(Instant.now());
 
         ctx.getStub().putStringState(username, genson.serialize(user));
         return user;
