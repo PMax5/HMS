@@ -159,6 +159,8 @@ public class DataApp {
                                             + " a shift that does not exist.")
                                     .build()
                             );
+                        } else {
+                            responseBuilder.setLastShiftId(shiftLog.getShiftId());
                         }
                     } else {
                         responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
