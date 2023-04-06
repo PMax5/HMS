@@ -11,6 +11,7 @@ public class User {
     int age;
     String profileId;
     List<Integer> routeIds;
+    long timestamp;
 
     public UserRole getRole() {
         return role;
@@ -69,10 +70,14 @@ public class User {
     }
 
     public List<Integer> getRouteIds() {
-        return routeIds;
+        return this.routeIds;
     }
 
     public void setRouteIds(List<Integer> routeIds) {
         this.routeIds = routeIds;
+    }
+
+    public long getTimestamp() {
+        return this.timestamp;
     }
 }
