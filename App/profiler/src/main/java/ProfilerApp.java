@@ -47,7 +47,11 @@ public class ProfilerApp {
                                         .stream()
                                         .map(t -> t.getValueDescriptor().getName())
                                         .collect(Collectors.toList()),
-                                request.getRouteIdsList()
+                                request.getRouteIdsList(),
+                                request.getRouteCharacteristicsList()
+                                        .stream()
+                                        .map(rc -> rc.getValueDescriptor().getName())
+                                        .collect(Collectors.toList())
                         );
 
                         if (profile == null) {
@@ -160,12 +164,41 @@ public class ProfilerApp {
                         }
                     } else {
                         responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
-                                .setDescription("[Profiler Service] User is not authorized to view exisiting profiles.")
+                                .setDescription("[Profiler Service] User is not authorized to view existing profiles.")
                                 .build()
                         );
                     }
 
                     profilerServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
+                }
+            });
+
+            profilerServer.addOperationHandler(Operations.ANALYZE_PROFILE, new Operation() {
+                @Override
+                public void execute(String consumerTag, Delivery delivery) throws IOException {
+                    Profiler.AnalyzeProfileRequest request = Profiler.AnalyzeProfileRequest
+                            .parseFrom(delivery.getBody());
+
+                    profilerService.analyizeDriverData(
+                            request.getUsername(),
+                            request.getLastShiftId(),
+                            request.getShiftLogsList()
+                                    .stream()
+                                    .map(l -> new ShiftLog(
+                                            l.getUserId(),
+                                            l.getShiftId(),
+                                            l.getVehicleId(),
+                                            l.getRouteId(),
+                                            l.getAverageBPM(),
+                                            l.getAverageDrowsiness(),
+                                            l.getAverageSpeed()
+                                    )).collect(Collectors.toList())
+                    );
+
+
+
+
+
                 }
             });
 
