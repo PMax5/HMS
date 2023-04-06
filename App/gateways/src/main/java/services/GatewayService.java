@@ -208,13 +208,14 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
         try {
             System.out.println("[Gateway Service] Ending shift for user " + request.getUsername());
             RpcClient rpcClient = this.getRpcClient(dataServiceQueueName);
-            final byte[] dataResponse = rpcClient.sendRequest(
+            final byte[] dataResponseBytes = rpcClient.sendRequest(
                     dataServiceQueueName,
                     rpcClient.getChannel(),
                     Operations.END_SHIFT_REQUEST,
                     request.toByteArray()
             );
 
+            Data.EndShiftResponse dataResponse = Data.EndShiftResponse.parseFrom(dataResponseBytes);
             Data.GetShiftLogsRequest shiftLogsRequest = Data.GetShiftLogsRequest.newBuilder()
                     .setUsername(request.getUsername())
                     .build();
@@ -230,6 +231,7 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
             Data.GetShiftLogsResponse shiftLogsResponse = Data.GetShiftLogsResponse.parseFrom(shiftLogsResponseBytes);
             Profiler.AnalyzeProfileRequest analyzeProfileRequest = Profiler.AnalyzeProfileRequest.newBuilder()
                     .addAllShiftLogs(shiftLogsResponse.getShiftLogList())
+                    .setLastShiftId(dataResponse.getLastShiftId())
                     .setUsername(request.getUsername())
                     .build();
 
@@ -251,7 +253,7 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
             }
             rpcClient.close();
 
-            responseObserver.onNext(Data.EndShiftResponse.parseFrom(dataResponse));
+            responseObserver.onNext(dataResponse);
             responseObserver.onCompleted();
         } catch (IOException | TimeoutException | ExecutionException | InterruptedException e) {
             System.err.println("[Gateway Service] An error occurred while submitting data logs for a user: "
