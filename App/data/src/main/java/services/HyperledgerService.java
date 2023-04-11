@@ -20,10 +20,9 @@ public class HyperledgerService {
     private final Wallet wallet;
     private final Genson genson;
 
-    private final static String DATA_USER_ID = "dataUser";
     private final static String DATA_CHANNEL = "auditlogs";
     private final static String DATA_CONTRACT = "data";
-    private final static String PROCESSED_DATA_CHANNEL = "shift_data";
+    private final static String PROCESSED_DATA_CHANNEL = "shiftdata";
     private final static String PROCESSED_DATA_CONTRACT = "shiftdata";
     private final Config config;
 
