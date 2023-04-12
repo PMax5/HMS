@@ -1,3 +1,4 @@
+import exceptions.OBUException;
 import services.OBUService;
 
 public class OBUApp {
@@ -14,6 +15,8 @@ public class OBUApp {
 
         try {
             obuService.close();
+        } catch (OBUException e) {
+            System.err.println("[OBU Service][Backend Exception] Failed to perform operation: " + e.getMessage());
         } catch (Exception e) {
             System.err.println("[OBU Service] Failed to shutdown OBU service: " + e.getMessage());
         }
