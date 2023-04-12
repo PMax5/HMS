@@ -16,6 +16,7 @@
         <module>data</module>
         <module>profiler</module>
         <module>gateways</module>
+        <module>obu</module>
     </modules>
 
     <properties>
