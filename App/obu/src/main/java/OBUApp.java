@@ -53,6 +53,7 @@ public class OBUApp {
 
                 testCommands = testsService.getNextTestCommands();
             }
+
             obuService.close();
         } catch (IOException e) {
             System.err.println("[OBU Service] Error with files: " + e.getMessage());
