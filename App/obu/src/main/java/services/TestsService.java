@@ -25,11 +25,11 @@ public class TestsService {
 
     public List<List<String>> getNextTestCommands() throws IOException {
         this.currentTest += 1;
-        if (this.currentTest == this.filePaths.size()) {
+        if (this.currentTest > this.filePaths.size()) {
             return null;
         }
 
-        List<String> allLines = Files.lines(this.filePaths.get(this.currentTest))
+        List<String> allLines = Files.lines(this.filePaths.get(this.currentTest - 1))
                 .collect(Collectors.toList());
 
         List<List<String>> allArguments = new ArrayList<>();
@@ -41,7 +41,7 @@ public class TestsService {
     }
 
     private File getOutputFile() {
-        Path currentTestFile = this.filePaths.get(this.currentTest);
+        Path currentTestFile = this.filePaths.get(this.currentTest - 1);
         return new File(TESTS_OUTPUT_DIR + currentTestFile.getFileName().toString() + "_output");
     }
 
