@@ -56,6 +56,10 @@
                 </executions>
                 <configuration>
                     <mainClass>${mainClass}</mainClass>
+                    <arguments>
+                        <argument>${host}</argument>
+                        <argument>${port}</argument>
+                    </arguments>
                 </configuration>
             </plugin>
             <plugin>
@@ -74,10 +78,6 @@
                     <programs>
                         <program>
                             <mainClass>${mainClass}</mainClass>
-                            <arguments>
-                                <argument>{$host}</argument>
-                                <argument>{$port}</argument>
-                            </arguments>
                             <id>${project.artifactId}</id>
                         </program>
                     </programs>
