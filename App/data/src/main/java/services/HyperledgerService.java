@@ -38,7 +38,7 @@ public class HyperledgerService {
     }
 
     public Gateway getGateway() throws IOException {
-        Path networkConfigPath = Paths.get( "resources", "org1.example.com", "connection-org1.json");
+        Path networkConfigPath = Paths.get("resources", "org1.example.com", "connection-org1.json");
         return Gateway.createBuilder()
                 .identity(this.wallet, this.config.getHyperledgerUserId())
                 .networkConfig(networkConfigPath)
