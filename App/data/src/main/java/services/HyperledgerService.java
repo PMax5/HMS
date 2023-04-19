@@ -4,7 +4,6 @@ import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
 import models.Config;
 import models.DataLog;
-import models.Shift;
 import models.ShiftLog;
 import org.hyperledger.fabric.gateway.*;
 
