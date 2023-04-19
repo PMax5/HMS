@@ -15,7 +15,6 @@
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
         <mainClass>DataApp</mainClass>
-        <port>8080</port>
     </properties>
 
     <dependencies>
@@ -23,7 +22,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>protos</artifactId>
             <version>1.0.0</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -70,9 +68,6 @@
                 </executions>
                 <configuration>
                     <mainClass>${mainClass}</mainClass>
-                    <arguments>
-                        <argument>${port}</argument>
-                    </arguments>
                 </configuration>
             </plugin>
             <plugin>
