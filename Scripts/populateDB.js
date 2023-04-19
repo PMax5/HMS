@@ -21,7 +21,12 @@ hmsDB.routes.insertMany([
         id: 778,
         vehicles: [
             {
-
+                id: 2488,
+                type: "SHORT_DISTANCE"
+            },
+            {
+                id: 2482,
+                type: "SHORT_DISTANCE"
             }
         ],
         characteristics: [
@@ -35,5 +40,52 @@ hmsDB.routes.insertMany([
             "SHIFT_NIGHT"
         ],
         slots: 4
+    },
+    {
+        id: 750,
+        vehicles: [
+            {
+                id: 4245,
+                type: "SHORT_DISTANCE"
+            },
+            {
+                id: 4245,
+                type: "SHORT_DISTANCE"
+            }
+        ],
+        characteristics: [
+            "HIGH_TRAFFIC",
+            "LARGE_ROADS",
+            "CRIMINAL_AREA"
+        ],
+        shiftTypes: [
+            "SHIFT_MORNING",
+            "SHIFT_AFTERNOON",
+            "SHIFT_NIGHT"
+        ],
+        slots: 10
+    },
+    {
+        id: 720,
+        vehicles: [
+            {
+                id: 4245,
+                type: "SHORT_DISTANCE"
+            },
+            {
+                id: 4245,
+                type: "SHORT_DISTANCE"
+            }
+        ],
+        characteristics: [
+            "LOW_TRAFFIC",
+            "THIN_ROADS",
+            "REGULAR_AREA"
+        ],
+        shiftTypes: [
+            "SHIFT_AFTERNOON",
+            "SHIFT_NIGHT"
+        ],
+        slots: 3
     }
 ]);
