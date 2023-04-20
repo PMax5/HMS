@@ -11,22 +11,8 @@ import java.util.concurrent.ExecutionException;
 
 public class RpcClient extends com.rabbitmq.client.RpcClient {
 
-    private final Map<Operations, DeliverCallback> operations = new TreeMap<>();
-    private final String queueName;
-
-    public RpcClient(RpcClientParams params, String queueName) throws IOException {
+    public RpcClient(RpcClientParams params) throws IOException {
         super(params);
-
-        this.queueName = queueName;
-    }
-
-    public void addOperationReplyHandler(Operations operationId, DeliverCallback deliverCallback) throws IOException {
-        this.operations.put(operationId, deliverCallback);
-    }
-
-    public void executeOperationReplyHandler(Operations operationId, Channel channel) throws IOException {
-        DeliverCallback operationHandler = this.operations.get(operationId);
-        channel.basicConsume(this.queueName, false, operationHandler, (consumerTag -> {}));
     }
 
     public byte[] sendRequest(String queueName,
