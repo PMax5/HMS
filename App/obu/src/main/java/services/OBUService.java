@@ -41,10 +41,12 @@ public class OBUService implements AutoCloseable {
                 .setPassword(password)
                 .build();
 
+        System.out.println("[OBU Service] Logging in user: " + username);
         Auth.UserAuthenticationResponse authenticationResponse = this.stub.authenticateUser(authenticationRequest);
         if (authenticationResponse.hasErrorMessage()) {
             throw new OBUException(authenticationResponse.getErrorMessage().getDescription());
         }
+
 
         this.userToken = authenticationResponse.getToken();
         this.username = username;
@@ -55,6 +57,7 @@ public class OBUService implements AutoCloseable {
                 .setToken(this.userToken)
                 .build();
 
+        System.out.println("[OBU Service] Logging out user: " + this.username);
         Auth.UserLogoutResponse logoutResponse = this.stub.logoutUser(logoutRequest);
         if (logoutResponse.hasErrorMessage()) {
             throw new OBUException(logoutResponse.getErrorMessage().getDescription());
@@ -68,7 +71,11 @@ public class OBUService implements AutoCloseable {
         this.resetData();
     }
 
-    public void startShift(int routeId, int vehicleId) throws OBUException {
+    public void startShift(int routeId, int vehicleId) throws Exception {
+        if (this.userToken == null) {
+            throw new Exception("[OBU Service] Failed to login user, shutting down.");
+        }
+
         Data.StartShiftRequest startShiftRequest = Data.StartShiftRequest.newBuilder()
                 .setToken(this.userToken)
                 .setUsername(this.username)
@@ -82,6 +89,7 @@ public class OBUService implements AutoCloseable {
         }
 
         this.shiftId = startShiftResponse.getShiftId();
+        System.out.println("[OBU Service] Started shift for user: " + this.username);
     }
 
     public void endShift() throws OBUException {
@@ -99,6 +107,8 @@ public class OBUService implements AutoCloseable {
         this.routeId = 0;
         this.vehicleId = 0;
         this.resetData();
+
+        System.out.println("[OBU Service] Ended shift for user: " + this.username);
     }
 
     public void submitUserData() throws OBUException {
@@ -125,6 +135,7 @@ public class OBUService implements AutoCloseable {
         }
 
         this.resetData();
+        System.out.println("[OBU Service] Submitted data for user: " + this.username);
     }
 
     public void addBpm(int bpm) {
