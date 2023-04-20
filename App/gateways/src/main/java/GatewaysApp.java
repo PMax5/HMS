@@ -19,6 +19,7 @@ public class GatewaysApp {
 
             server.start();
             System.out.println("[Gateways App] Starting server on port " + config.getServerPort());
+            server.awaitTermination();
         } catch (Exception e) {
             System.err.println("[Gateways App] Unexpected error occurred: " + e.getMessage());
         }
