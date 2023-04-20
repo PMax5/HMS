@@ -9,12 +9,19 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class RpcServer extends com.rabbitmq.client.RpcServer {
+public class RpcServer {
 
     private final Map<Operations, Operation> operations = new TreeMap<>();
+    private final Channel channel;
+    private final String queueName;
 
-    public RpcServer(Channel channel, String queueName) throws IOException {
-        super(channel, queueName);
+    public RpcServer(Channel channel, String queueName) {
+        this.channel = channel;
+        this.queueName = queueName;
+    }
+
+    public Channel getChannel() {
+        return this.channel;
     }
 
     public void addOperationHandler(Operations operationId, Operation operation) throws IOException {
