@@ -34,7 +34,7 @@ public class ProfilerService {
     public Config loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
         String configQueueName = this.rabbitMqService.getRabbitMqConfig().getConfigQueue();
         Channel channel = rabbitMqService.createNewChannel();
-        RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), configQueueName);
+        RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel));
 
         hmsProto.Config.GetConfigRequest configRequest = hmsProto.Config.GetConfigRequest.newBuilder()
                 .setServiceId(this.serviceId)
@@ -62,7 +62,7 @@ public class ProfilerService {
         try {
             String registryQueueName = "service_registry";
             Channel channel = this.rabbitMqService.createNewChannel();
-            RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), registryQueueName);
+            RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel));
 
             Auth.UserAuthorizationRequest authorizationRequest = Auth.UserAuthorizationRequest.newBuilder()
                     .setToken(token)
