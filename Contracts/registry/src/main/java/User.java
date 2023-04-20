@@ -2,7 +2,6 @@ import com.owlike.genson.annotation.JsonProperty;
 import org.hyperledger.fabric.contract.annotation.DataType;
 import org.hyperledger.fabric.contract.annotation.Property;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -45,13 +44,13 @@ public final class User {
                 @JsonProperty("age") final int age, @JsonProperty("gender") final String gender,
                 @JsonProperty("role") final String role,
                 @JsonProperty("hashedPassword") final String hashedPassword,
-                @JsonProperty("timestamp") final long timestamp) {
+                @JsonProperty("timestamp") final long timestamp, @JsonProperty("createdAt") final long createdAt) {
         this.name = name;
         this.username = username;
         this.age = age;
         this.gender = gender;
         this.role = role;
-        this.createdAt = Instant.now().getEpochSecond();
+        this.createdAt = createdAt;
         this.routeIds = new ArrayList<>();
         this.hashedPassword = hashedPassword;
         this.timestamp = timestamp;
@@ -107,8 +106,8 @@ public final class User {
 
     public long getTimestamp() { return this.timestamp; }
 
-    public void setTimestamp(Instant instant) {
-        this.timestamp = Instant.now().getEpochSecond();
+    public void setTimestamp(long instant) {
+        this.timestamp = instant;
     }
 
     @Override

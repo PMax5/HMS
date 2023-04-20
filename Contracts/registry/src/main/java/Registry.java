@@ -55,7 +55,17 @@ public final class Registry implements ContractInterface {
             throw new ChaincodeException("User " + username + " already exists.", UserRegistryErrors.USER_ALREADY_EXISTS.toString());
         }
 
-        User user = new User(name, username, age, gender, role, hashedPassword, Instant.now().getEpochSecond());
+        long createdAt = Instant.now().getEpochSecond();
+        User user = new User(
+                name,
+                username,
+                age,
+                gender,
+                role,
+                hashedPassword,
+                createdAt,
+                createdAt
+        );
         userState = genson.serialize(user);
         stub.putStringState(username, userState);
 
@@ -98,7 +108,7 @@ public final class Registry implements ContractInterface {
     public User updateUserProfileId(final Context ctx, final String username, final String profileId) {
         User user = this.queryUser(ctx, username);
         user.setProfileId(profileId);
-        user.setTimestamp(Instant.now());
+        user.setTimestamp(Instant.now().getEpochSecond());
 
         ctx.getStub().putStringState(username, genson.serialize(user));
         return user;
