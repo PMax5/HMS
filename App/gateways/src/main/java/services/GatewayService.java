@@ -26,14 +26,14 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
         this.rabbitMqService = rabbitMqService;
     }
 
-    private RpcClient getRpcClient(String queueName) throws IOException, TimeoutException {
-        Channel channel = rabbitMqService.createNewChannel();
-        return new RpcClient(new RpcClientParams().channel(channel), queueName);
+    private RpcClient getRpcClient() throws IOException, TimeoutException {
+        Channel channel = this.rabbitMqService.createNewChannel();
+        return new RpcClient(new RpcClientParams().channel(channel));
     }
 
     public Config loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
         String configQueueName = this.rabbitMqService.getRabbitMqConfig().getConfigQueue();
-        RpcClient rpcClient = this.getRpcClient(configQueueName);
+        RpcClient rpcClient = this.getRpcClient();
 
         hmsProto.Config.GetConfigRequest configRequest = hmsProto.Config.GetConfigRequest.newBuilder()
                 .setServiceId(SERVICE_ID)
@@ -57,7 +57,8 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
                              StreamObserver<Auth.UserRegistrationResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_registry");
         try {
-            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            System.out.println("[Gateway Service] Sending registration request for user: " + request.getUsername());
+            RpcClient rpcClient = this.getRpcClient();
             final byte[] response = rpcClient.sendRequest(
                     serviceQueueName,
                     rpcClient.getChannel(),
@@ -78,7 +79,8 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
                                  StreamObserver<Auth.UserAuthenticationResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_registry");
         try {
-            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            System.out.println("[Gateway Service] Sending authentication request for user: " + request.getUsername());
+            RpcClient rpcClient = this.getRpcClient();
             final byte[] response = rpcClient.sendRequest(
                     serviceQueueName,
                     rpcClient.getChannel(),
@@ -99,7 +101,8 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
                                  StreamObserver<Auth.UserLogoutResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_registry");
         try {
-            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            System.out.println("[Gateway Service] Sending logout request for user with token: " + request.getToken());
+            RpcClient rpcClient = this.getRpcClient();
             final byte[] response = rpcClient.sendRequest(
                     serviceQueueName,
                     rpcClient.getChannel(),
@@ -120,7 +123,8 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
                                  StreamObserver<Auth.UserDeleteResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_registry");
         try {
-            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            System.out.println("[Gateway Service] Sending user delete request for user: " + request.getUsername());
+            RpcClient rpcClient = this.getRpcClient();
             final byte[] response = rpcClient.sendRequest(
                     serviceQueueName,
                     rpcClient.getChannel(),
@@ -141,7 +145,8 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
                            StreamObserver<Data.GetDataLogResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_data");
         try {
-            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            System.out.println("[Gateway Service] Sending fetch data request for user: " + request.getUsername());
+            RpcClient rpcClient = this.getRpcClient();
             final byte[] response = rpcClient.sendRequest(
                     serviceQueueName,
                     rpcClient.getChannel(),
@@ -163,7 +168,9 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
                             StreamObserver<Data.SubmitDataLogResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_data");
         try {
-            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            System.out.println("[Gateway Service] Sending data submission request for user with token: "
+                    + request.getToken());
+            RpcClient rpcClient = this.getRpcClient();
             final byte[] response = rpcClient.sendRequest(
                     serviceQueueName,
                     rpcClient.getChannel(),
@@ -184,7 +191,8 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
     public void startShift(Data.StartShiftRequest request, StreamObserver<Data.StartShiftResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_data");
         try {
-            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            System.out.println("[Gateway Service] Sending start shift request for user: " + request.getUsername());
+            RpcClient rpcClient = this.getRpcClient();
             final byte[] response = rpcClient.sendRequest(
                     serviceQueueName,
                     rpcClient.getChannel(),
@@ -206,8 +214,8 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
         String dataServiceQueueName = this.config.getServiceChannel("service_data");
         String profilerServiceQueueName = this.config.getServiceChannel("service_profiler");
         try {
-            System.out.println("[Gateway Service] Ending shift for user " + request.getUsername());
-            RpcClient rpcClient = this.getRpcClient(dataServiceQueueName);
+            System.out.println("[Gateway Service] Sending end shift request for user: " + request.getUsername());
+            RpcClient rpcClient = this.getRpcClient();
             final byte[] dataResponseBytes = rpcClient.sendRequest(
                     dataServiceQueueName,
                     rpcClient.getChannel(),
@@ -266,7 +274,8 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
                                 StreamObserver<Profiler.RegisterProfileResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_profiler");
         try {
-            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            System.out.println("[Gateway Service] Sending profile registration request for a new profile.");
+            RpcClient rpcClient = this.getRpcClient();
             final byte[] response = rpcClient.sendRequest(
                     serviceQueueName,
                     rpcClient.getChannel(),
@@ -288,7 +297,8 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
                             StreamObserver<Profiler.GetProfilesResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_profiler");
         try {
-            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            System.out.println("[Gateway Service] Sending fetch profiles request");
+            RpcClient rpcClient = this.getRpcClient();
             final byte[] response = rpcClient.sendRequest(
                     serviceQueueName,
                     rpcClient.getChannel(),
@@ -310,7 +320,8 @@ public class GatewayService extends GatewaysGrpc.GatewaysImplBase {
                             StreamObserver<Profiler.SetProfileResponse> responseObserver) {
         String serviceQueueName = this.config.getServiceChannel("service_profiler");
         try {
-            RpcClient rpcClient = this.getRpcClient(serviceQueueName);
+            System.out.println("[Gateway Service] Sending set profile request for user: " + request.getUsername());
+            RpcClient rpcClient = this.getRpcClient();
             final byte[] response = rpcClient.sendRequest(
                     serviceQueueName,
                     rpcClient.getChannel(),
