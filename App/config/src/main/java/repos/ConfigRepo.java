@@ -44,26 +44,7 @@ public class ConfigRepo {
         return this.mongoClient.getDatabase("hms");
     }
 
-    private String getServicesChannels() {
-        MongoDatabase mongoDatabase = this.newConnection();
-        MongoCollection<Document> mongoCollection = mongoDatabase.getCollection("configs");
-
-        Map<String, String> serviceChannels = new TreeMap<>();
-
-        mongoCollection.find().forEach(document -> {
-            JsonObject json = JsonParser.parseString(document.getString("serviceConfig")).getAsJsonObject();
-            serviceChannels.put(document.getString("serviceId"), json.get("channelName").getAsString());
-        });
-        this.mongoClient.close();
-
-        return this.gson.toJson(serviceChannels);
-    }
-
     public String getServiceConfig(String serviceId) {
-        if (serviceId.equals("service_gateways")) {
-            return this.getServicesChannels();
-        }
-
         MongoDatabase mongoDatabase = this.newConnection();
         MongoCollection<Document> mongoCollection = mongoDatabase.getCollection("configs");
 
