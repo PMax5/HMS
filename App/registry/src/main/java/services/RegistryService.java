@@ -30,7 +30,7 @@ public class RegistryService {
     public Config loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
         String configQueueName = this.rabbitMqService.getRabbitMqConfig().getConfigQueue();
         Channel channel = this.rabbitMqService.createNewChannel();
-        RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel), configQueueName);
+        RpcClient rpcClient = new RpcClient(new RpcClientParams().channel(channel));
 
         hmsProto.Config.GetConfigRequest configRequest = hmsProto.Config.GetConfigRequest.newBuilder()
                 .setServiceId(SERVICE_ID)
@@ -96,7 +96,7 @@ public class RegistryService {
             this.authenticatedUsers.put(token, user);
 
             System.out.println("[Registry Service] Authenticated user " +
-                    user.getUsername() + "successfully with token " + token);
+                    user.getUsername() + " successfully with token " + token);
             return token;
         } catch (IOException | ContractException e) {
             System.err.println("[Registry Service] Failed to login user: " + e.getMessage());
