@@ -17,7 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>OBUApp</mainClass>
         <host>localhost</host>
-        <port>8080</port>
+        <port>8081</port>
     </properties>
 
     <dependencies>
