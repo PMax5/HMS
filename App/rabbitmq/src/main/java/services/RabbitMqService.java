@@ -40,42 +40,6 @@ public class RabbitMqService {
         return connection.createChannel();
     }
 
-    /*public Channel newRPCQueue(String queueName, DeliverCallback deliverCallback, CancelCallback cancelCallback, Channel c) throws IOException, TimeoutException {
-        Channel channel = c != null ? c : this.createNewChannel();
-        channel.queueDeclare(queueName, true, false, true, null);
-        channel.queuePurge(queueName);
-        channel.basicConsume(queueName, false, deliverCallback, cancelCallback != null ? cancelCallback : (consumerTag -> {}));
-
-        return channel;
-    }
-
-    public Channel newRPCRequest(String queueName, String exchangeName, byte[] requestBody, Channel c) throws IOException, TimeoutException {
-        Channel channel = c != null ? c : this.createNewChannel();
-        final String corrId = UUID.randomUUID().toString();
-        String replyQueueName = channel.queueDeclare().getQueue();
-        AMQP.BasicProperties props = new AMQP.BasicProperties
-                .Builder()
-                .correlationId(corrId)
-                .replyTo(replyQueueName)
-                .build();
-
-        channel.basicPublish(exchangeName, queueName, props, requestBody);
-
-        final CompletableFuture<String> response = new CompletableFuture<>();
-
-        String ctag = channel.basicConsume(replyQueueName, true, (consumerTag, delivery) -> {
-            if (delivery.getProperties().getCorrelationId().equals(corrId)) {
-                response.complete(new String(delivery.getBody(), StandardCharsets.UTF_8));
-            }
-        }, consumerTag -> {
-        });
-
-        String result = response.get();
-        channel.basicCancel(ctag);
-
-        System.out.println(result);
-    }*/
-
     public RpcServer newRpcServer(String queueName) throws IOException, TimeoutException {
         Channel channel = this.createNewChannel();
         channel.queueDeclare(queueName, true, false, false, null);
