@@ -31,6 +31,8 @@ public class ConfigApp {
                                 .setServiceConfig(configService.getConfig(request.getServiceId()))
                                 .build();
 
+                        System.out.println("[Config App] Received new operation request from service: " +
+                                request.getServiceId());
                         configServer.sendResponseAndAck(delivery, response.toByteArray());
                     }
                 }
@@ -48,7 +50,7 @@ public class ConfigApp {
             });
 
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
-                System.out.println("[Config App] Received new operation request!");
+                System.out.println("[Config App] Received a new request!");
                 configServer.executeOperationHandler(delivery);
             };
 
