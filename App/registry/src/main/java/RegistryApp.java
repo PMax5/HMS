@@ -11,7 +11,7 @@ import java.io.IOException;
 public class RegistryApp {
     public static void main(String[] args) {
         try {
-            final String SERVICE_ID = "service_config";
+            final String SERVICE_ID = "service_registry";
             RabbitMqService rabbitMqService = new RabbitMqService();
             RegistryService registryService = new RegistryService(rabbitMqService);
 
@@ -55,6 +55,9 @@ public class RegistryApp {
                                         .setProfileId(user.getProfileId())
                                         .addAllRouteIds(user.getRouteIds())
                                         .build());
+
+                                System.out.println("[Registry Service] Registered user " + user.getUsername() +
+                                        " successfully!");
                             }
 
                             registryServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
@@ -67,29 +70,22 @@ public class RegistryApp {
                         public void execute(String consumerTag, Delivery delivery) throws IOException {
                             Auth.UserAuthenticationRequest request = Auth.UserAuthenticationRequest
                                     .parseFrom(delivery.getBody());
-
                             String token = registryService.authenticateUser(
                                     request.getUsername(),
                                     request.getPassword()
                             );
 
                             Auth.UserAuthenticationResponse.Builder responseBuilder = Auth.UserAuthenticationResponse.newBuilder();
-
                             if (token == null) {
                                 responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
                                         .setDescription("[Registry Service] Failed to login user " + request.getUsername())
                                         .build());
                             } else {
                                 User user = registryService.getUserByToken(token);
-                                responseBuilder.setUserdata(Auth.UserData.newBuilder()
-                                        .setUsername(user.getUsername())
-                                        .setName(user.getName())
-                                        .setAge(user.getAge())
-                                        .setGender(Auth.GENDER.valueOf(user.getGender().toString()))
-                                        .setRole(Auth.ROLE.valueOf(user.getRole().toString()))
-                                        .setProfileId(user.getProfileId())
-                                        .addAllRouteIds(user.getRouteIds())
-                                        .build());
+                                responseBuilder.setToken(token);
+
+                                System.out.println("[Registry Service] Authenticated user " + user.getUsername() +
+                                        " successfully.");
                             }
 
                             registryServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
@@ -115,6 +111,8 @@ public class RegistryApp {
                                         .build());
                             } else {
                                 responseBuilder.setRole(Auth.ROLE.valueOf(role.toString()));
+                                System.out.println("[Registry Service] Authorized user " + request.getToken() +
+                                        " successfully.");
                             }
 
                             registryServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
@@ -138,6 +136,9 @@ public class RegistryApp {
                                 responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
                                         .setDescription("[Registry Service] Failed to logout user with token: " + request.getToken())
                                         .build());
+                            } else {
+                                System.out.println("[Registry Service] Logged out user with token " + request.getToken()
+                                        + " successfully.");
                             }
 
                             registryServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
@@ -163,6 +164,9 @@ public class RegistryApp {
                                         .setDescription("[Registry Service] Failed to delete user with username: " +
                                                 request.getUsername())
                                         .build());
+                            } else {
+                                System.out.println("[Registry Service] Deleted user " + request.getUsername() +
+                                        " successfully.");
                             }
 
                             registryServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
