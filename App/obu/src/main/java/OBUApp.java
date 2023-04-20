@@ -31,6 +31,7 @@ public class OBUApp {
             while(testCommands != null) {
                 testsService.createOutputFile();
                 for (List<String> command: testCommands) {
+                    System.out.println("[OBU Service] Running command: " + command);
                     try {
                         switch (command.get(0)) {
                             case LOGIN_USER_COMMAND -> obuService.loginUser(command.get(1), command.get(2));
@@ -58,7 +59,9 @@ public class OBUApp {
         } catch (IOException e) {
             System.err.println("[OBU Service] Error with files: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("[OBU Service] Failed to shutdown OBU service: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("[OBU Service] Something went wrong with the OBU service: " + e.getMessage());
+            System.exit(-1);
         }
     }
 }
