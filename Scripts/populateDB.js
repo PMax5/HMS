@@ -15,6 +15,10 @@ if (!conn.getDBNames().includes(dbName)) {
         {
             serviceId: 'service_registry',
             serviceConfig: '{ \"userAffiliation\": \"org1.department1\", \"mspId\": \"Org1MSP\", \"userIds\": [\"dataUser\", \"profilerUser\"] }'
+        },
+        {
+            serviceId: 'service_gateways',
+            serviceConfig: '{ \"serviceChannels\": { \"service_data\": \"service_data\", \"service_profiler\": \"service_profiler\", \"service_registry\": \"service_registry\" }, \"serverPort\": 8081 }'
         }
     ]);
 
