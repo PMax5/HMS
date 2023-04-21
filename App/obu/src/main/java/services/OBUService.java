@@ -89,6 +89,8 @@ public class OBUService implements AutoCloseable {
         }
 
         this.shiftId = startShiftResponse.getShiftId();
+        this.routeId = routeId;
+        this.vehicleId = vehicleId;
         System.out.println("[OBU Service] Started shift for user: " + this.username);
     }
 
