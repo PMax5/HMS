@@ -73,19 +73,15 @@ public final class Registry implements ContractInterface {
     }
 
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public String queryAllUsers(final Context ctx) {
+    public String queryAllUsers(final Context ctx, final String role) {
         ChaincodeStub stub = ctx.getStub();
 
-        QueryResultsIterator<KeyValue> results = stub.getStateByRange("", ""); // Fetch all users with empty ""
+        String query = String.format("{ \"selector\": { \"role\": \"%s\" } }", role);
+        QueryResultsIterator<KeyValue> results = stub.getQueryResult(query);
         List<User> queryResults = new ArrayList<>();
 
-        try {
-            results.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         for (KeyValue result: results) {
+            System.out.println("Fetching user: " + result.getStringValue());
             User user = genson.deserialize(result.getStringValue(), User.class);
             queryResults.add(user);
         }
