@@ -1,22 +1,24 @@
 import com.owlike.genson.annotation.JsonProperty;
+import org.hyperledger.fabric.contract.annotation.DataType;
 import org.hyperledger.fabric.contract.annotation.Property;
 
 import java.util.List;
 import java.util.Objects;
 
+@DataType()
 public class Profile {
 
     @Property()
     private final String id;
 
     @Property()
-    private final List<Integer> ageRage;
+    private final List<Integer> ageRange;
 
     @Property()
     private final String gender;
 
     @Property()
-    private final List<Integer> shiftHoursRage;
+    private final List<Integer> shiftHoursRange;
 
     @Property()
     private final List<String> shiftTypes;
@@ -24,17 +26,22 @@ public class Profile {
     @Property()
     private final List<Integer> routeIds;
 
-    public Profile(@JsonProperty("id") String id, @JsonProperty("ageRange") List<Integer> ageRage,
+    @Property()
+    private final int type;
+
+    public Profile(@JsonProperty("id") String id, @JsonProperty("ageRange") List<Integer> ageRange,
                    @JsonProperty("gender") String gender,
-                   @JsonProperty("shiftHoursRage") List<Integer> shiftHoursRage,
+                   @JsonProperty("shiftHoursRange") List<Integer> shiftHoursRange,
                    @JsonProperty("shiftTypes") List<String> shiftTypes,
-                   @JsonProperty("routeIds") List<Integer> routeIds) {
+                   @JsonProperty("routeIds") List<Integer> routeIds,
+                   @JsonProperty("type") int type) {
         this.id = id;
-        this.ageRage = ageRage;
+        this.ageRange = ageRange;
         this.gender = gender;
-        this.shiftHoursRage = shiftHoursRage;
+        this.shiftHoursRange = shiftHoursRange;
         this.shiftTypes = shiftTypes;
         this.routeIds = routeIds;
+        this.type = type;
     }
 
     public String getId() {
@@ -42,11 +49,11 @@ public class Profile {
     }
 
     public Integer getMinAge() {
-        return this.ageRage.get(0);
+        return this.ageRange.get(0);
     }
 
     public Integer getMaxAge() {
-        return this.ageRage.get(1);
+        return this.ageRange.get(1);
     }
 
     public String getGender() {
@@ -54,11 +61,11 @@ public class Profile {
     }
 
     public Integer getMinShiftHours() {
-        return this.shiftHoursRage.get(0);
+        return this.shiftHoursRange.get(0);
     }
 
     public Integer getMaxShiftHours() {
-        return this.shiftHoursRage.get(1);
+        return this.shiftHoursRange.get(1);
     }
 
     public List<String> getShiftTypes() {
@@ -68,6 +75,8 @@ public class Profile {
     public List<Integer> getRouteIds() {
         return this.routeIds;
     }
+
+    public int getType() { return this.type; }
 
     @Override
     public int hashCode() {
@@ -79,7 +88,8 @@ public class Profile {
                 this.getMaxShiftHours(),
                 this.getMinAge(),
                 this.getMinShiftHours(),
-                this.getShiftTypes()
+                this.getShiftTypes(),
+                this.getType()
         );
     }
 }
