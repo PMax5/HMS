@@ -51,7 +51,8 @@ public class ProfilerApp {
                                 request.getRouteCharacteristicsList()
                                         .stream()
                                         .map(rc -> rc.getValueDescriptor().getName())
-                                        .collect(Collectors.toList())
+                                        .collect(Collectors.toList()),
+                                request.getType()
                         );
 
                         if (profile == null) {

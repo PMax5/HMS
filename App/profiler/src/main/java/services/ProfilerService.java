@@ -90,7 +90,8 @@ public class ProfilerService {
     }
 
     public Profile registerProfile(int minAge, int maxAge, String gender, int minHours, int maxHours,
-                                List<String> shiftTypes, List<Integer> routeIds, List<String> routeCharacteristics) {
+                                List<String> shiftTypes, List<Integer> routeIds, List<String> routeCharacteristics,
+                                   int type) {
         try {
             return this.hyperledgerService.registerProfile(
                     minAge,
@@ -100,7 +101,8 @@ public class ProfilerService {
                     maxHours,
                     shiftTypes,
                     routeIds,
-                    routeCharacteristics
+                    routeCharacteristics,
+                    type
             );
         } catch (IOException | ContractException | InterruptedException | TimeoutException e) {
             System.err.println("[Profiler Service] Failed to register profile: " + e.getMessage());

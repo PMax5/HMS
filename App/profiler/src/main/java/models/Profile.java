@@ -14,13 +14,15 @@ public class Profile {
     private List<ShiftType> shiftTypes;
     private List<Integer> routeIds;
     private List<RouteCharacteristic> routeCharacteristics;
+    private int type;
 
     public Profile(@JsonProperty("id") String id, @JsonProperty("ageRange") List<Integer> ageRange,
                    @JsonProperty("gender") String gender,
                    @JsonProperty("shiftHoursRage") List<Integer> shiftHoursRange,
                    @JsonProperty("shiftTypes") List<String> shiftTypes,
                    @JsonProperty("routeIds") List<Integer> routeIds,
-                   @JsonProperty("routeCharacteristics") List<String> routeCharacteristics) {
+                   @JsonProperty("routeCharacteristics") List<String> routeCharacteristics,
+                   @JsonProperty("type") int type) {
         this.id = id;
         this.ageRange = ageRange;
         this.gender = Gender.valueOf(gender);
@@ -34,6 +36,7 @@ public class Profile {
         });
 
         this.routeIds = routeIds;
+        this.type = type;
     }
 
     public String getId() {
@@ -71,4 +74,6 @@ public class Profile {
     public List<RouteCharacteristic> getRouteCharacteristics() {
         return this.routeCharacteristics;
     }
+
+    public int getType() { return this.type; }
 }
