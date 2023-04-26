@@ -170,11 +170,11 @@ public class HyperledgerService {
         return this.genson.deserialize(user, models.User.class);
     }
 
-    public List<models.User> getAllUsers() throws IOException, ContractException {
+    public List<models.User> getAllUsers(String role) throws IOException, ContractException {
         Gateway gateway = this.getGateway();
         Contract contract = this.getContract(gateway);
 
-        byte[] users = contract.evaluateTransaction("queryAllUsers");
+        byte[] users = contract.evaluateTransaction("queryAllUsers", role);
 
         gateway.close();
         return this.genson.deserialize(users, new GenericType<List<models.User>>(){});
