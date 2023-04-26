@@ -48,6 +48,7 @@ message Profile {
     repeated SHIFT_TYPE shiftTypes = 5;
     repeated int32 routeIds = 6;
     repeated ROUTE_CHARACTERISTIC routeCharacteristics = 7;
+    int32 type = 8;
 }
 
 message Route {
@@ -66,6 +67,7 @@ message RegisterProfileRequest {
     repeated int32 routeIds = 5;
     string token = 6;
     repeated ROUTE_CHARACTERISTIC routeCharacteristics = 7;
+    int32 type = 8;
 }
 
 message RegisterProfileResponse {
