@@ -204,6 +204,8 @@ public class DataApp {
                                 .collect(Collectors.toList())
                         );
                     }
+
+                    dataServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
                 }
             });
 
