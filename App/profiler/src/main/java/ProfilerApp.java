@@ -100,17 +100,27 @@ public class ProfilerApp {
                 public void execute(String consumerTag, Delivery delivery) throws IOException {
                     Profiler.SetProfileRequest request = Profiler.SetProfileRequest.parseFrom(delivery.getBody());
 
-                    boolean success = profilerService.setProfile(
-                            request.getUsername(),
-                            request.getProfileId()
-                    );
-
+                    UserRole role = profilerService.authorizeUser(request.getToken());
                     Profiler.SetProfileResponse.Builder responseBuilder = Profiler.SetProfileResponse.newBuilder();
 
-                    if (!success) {
+                    if (role.equals(UserRole.SUPERVISOR)) {
+                        boolean success = profilerService.setProfile(
+                                request.getUsername(),
+                                request.getProfileId()
+                        );
+
+                        if (!success) {
+                            responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
+                                    .setDescription("[Profiler Service] Failed to set profile " +
+                                            request.getProfileId() + " to user " + request.getUsername())
+                                    .build()
+                            );
+                        }
+                    } else {
                         responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
                                 .setDescription("[Profiler Service] Failed to set profile " +
-                                        request.getProfileId() + " to user " + request.getUsername())
+                                        request.getProfileId() + " to user " + request.getUsername() +
+                                        ": Requestor does not have enough privileges.")
                                 .build()
                         );
                     }
@@ -180,26 +190,34 @@ public class ProfilerApp {
                     Profiler.AnalyzeProfileRequest request = Profiler.AnalyzeProfileRequest
                             .parseFrom(delivery.getBody());
 
-                    profilerService.analyizeDriverData(
-                            request.getUsername(),
-                            request.getLastShiftId(),
-                            request.getShiftLogsList()
-                                    .stream()
-                                    .map(l -> new ShiftLog(
-                                            l.getUserId(),
-                                            l.getShiftId(),
-                                            l.getVehicleId(),
-                                            l.getRouteId(),
-                                            l.getAverageBPM(),
-                                            l.getAverageDrowsiness(),
-                                            l.getAverageSpeed()
-                                    )).collect(Collectors.toList())
-                    );
+                    Profiler.AnalyzeProfileResponse.Builder responseBuilder = Profiler.AnalyzeProfileResponse
+                            .newBuilder();
 
+                    try {
+                        profilerService.analyizeDriverData(
+                                request.getUsername(),
+                                request.getLastShiftId(),
+                                request.getShiftLogsList()
+                                        .stream()
+                                        .map(l -> new ShiftLog(
+                                                l.getUserId(),
+                                                l.getShiftId(),
+                                                l.getVehicleId(),
+                                                l.getRouteId(),
+                                                l.getAverageBPM(),
+                                                l.getAverageDrowsiness(),
+                                                l.getAverageSpeed(),
+                                                l.getTimestamp()
+                                        )).collect(Collectors.toList())
+                        );
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                        responseBuilder.setErrorMessage(Auth.ErrorMessage.newBuilder()
+                                .setDescription(e.getMessage())
+                                .build());
+                    }
 
-
-
-
+                    profilerServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
                 }
             });
 
