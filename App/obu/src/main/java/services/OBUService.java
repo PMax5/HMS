@@ -53,6 +53,10 @@ public class OBUService implements AutoCloseable {
     }
 
     public void logoutUser() throws OBUException {
+        if (this.userToken == null) {
+            return;
+        }
+
         Auth.UserLogoutRequest logoutRequest = Auth.UserLogoutRequest.newBuilder()
                 .setToken(this.userToken)
                 .build();
@@ -100,6 +104,7 @@ public class OBUService implements AutoCloseable {
                 .setUsername(this.username)
                 .build();
 
+        System.out.println("[OBU Service] Sending end shift request for user: " + this.username);
         Data.EndShiftResponse endShiftResponse = this.stub.endShift(endShiftRequest);
         if (endShiftResponse.hasErrorMessage()) {
             throw new OBUException(endShiftResponse.getErrorMessage().getDescription());
