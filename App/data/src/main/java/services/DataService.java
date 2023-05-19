@@ -106,6 +106,7 @@ public class DataService {
 
         ShiftLog shiftLog = this.processShiftData(this.activeShifts.get(username));
         this.activeShifts.remove(username);
+        System.out.println("[Data Service] Ended shift for user: " + username);
         return shiftLog;
     }
 
@@ -165,6 +166,8 @@ public class DataService {
             else if (!this.activeShifts.containsKey(username))
                 throw new Exception("No active shift was found for user: " + username);
 
+            List<Integer> needsRemoval = new ArrayList<>();
+
             for (int i = 0; i < bpmValues.size(); i++) {
                 int bpmValue = bpmValues.get(i);
                 int drowsinessValue = drowsinessValues.get(i);
@@ -183,12 +186,16 @@ public class DataService {
                     exceptionMessage = "Invalid timestamp value found: " + timestampValue;
 
                 if (!exceptionMessage.equals("")) {
-                    bpmValues.remove(i);
-                    drowsinessValues.remove(i);
-                    speedValues.remove(i);
-                    timestampValues.remove(i);
-                    throw new Exception(exceptionMessage);
+                    needsRemoval.add(i);
+                    System.out.println("[Data Service] " + exceptionMessage);
                 }
+            }
+
+            for (int i: needsRemoval) {
+                bpmValues.remove(i);
+                drowsinessValues.remove(i);
+                speedValues.remove(i);
+                timestampValues.remove(i);
             }
 
             return this.hyperledgerService.submitUserData(
