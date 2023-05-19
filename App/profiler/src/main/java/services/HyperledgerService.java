@@ -106,6 +106,6 @@ public class HyperledgerService {
         byte[] result = contract.evaluateTransaction("getUserProfile", username);
         gateway.close();
 
-        return this.genson.deserialize(result, String.class);
+        return new String(result);
     }
 }
