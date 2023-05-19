@@ -1,0 +1,18 @@
+login driver1 something
+startshift 750 4245
+data 160 70 50 1681730911
+datasubmit
+endshift
+startshift 750 4245
+data 160 70 50 1681730915
+datasubmit
+endshift
+startshift 750 4245
+data 160 70 50 1681730918
+datasubmit
+endshift
+startshift 750 4245
+data 160 70 50 1681730918
+datasubmit
+endshift
+logout
