@@ -43,7 +43,7 @@ public class RoutesRepo {
         MongoDatabase mongoDatabase = this.newConnection();
         MongoCollection<Document> mongoCollection = mongoDatabase.getCollection("routes");
 
-        Document document = mongoCollection.find(eq("routeId", routeId)).first();
+        Document document = mongoCollection.find(eq("id", routeId)).first();
         this.mongoClient.close();
 
         if (document == null) {
