@@ -8,6 +8,7 @@ import models.*;
 import org.hyperledger.fabric.gateway.ContractException;
 import repos.RoutesRepo;
 
+import javax.sound.midi.SysexMessage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,7 +50,6 @@ public class ProfilerService {
         rpcClient.close();
 
         hmsProto.Config.GetConfigResponse configResponse = hmsProto.Config.GetConfigResponse.parseFrom(response);
-        System.out.println(configResponse.getServiceConfig());
         this.config = new Gson().fromJson(configResponse.getServiceConfig(), Config.class);
         return this.config;
     }
@@ -113,6 +113,8 @@ public class ProfilerService {
     public boolean setProfile(String username, String profileId) {
         try {
             this.hyperledgerService.setProfile(username, profileId);
+            System.out.println("[Profiler Service] User " + username + " profile was successfully revised to: " +
+                    profileId);
             return true;
         } catch (IOException | ContractException | InterruptedException | TimeoutException e) {
             System.err.println("[Profiler Service] Failed to set profile " + profileId + " for user " + username + ": "
@@ -181,7 +183,7 @@ public class ProfilerService {
         return mostFrequentCharacteristic.get();
     }
 
-    public void analyizeDriverData(String username, String lastShiftId, List<ShiftLog> shiftLogs) {
+    public void analyizeDriverData(String username, String lastShiftId, List<ShiftLog> shiftLogs) throws Exception {
         ShiftLog lastShiftLog = null;
         List<ShiftLog> problematicShiftsBPM = new ArrayList<>();
         List<ShiftLog> problematicShiftsDrowsiness = new ArrayList<>();
@@ -232,28 +234,40 @@ public class ProfilerService {
                                 if (userProfile != null) {
                                     this.setProfile(username, userProfile.getId());
                                 } else {
-                                    System.err.println("Profile is null when trying to change shift (BPM).");
+                                    throw new Exception("Profile is null when trying to change shift (BPM).");
                                 }
                                 return;
                             }
                         }
 
                         switch (this.getMostFrequentRouteCharacteristic(characteristicsFrequencyBPM)) {
-                            case HIGH_TRAFFIC -> userProfile = this.getProfileForRouteCharacteristic(
-                                    userProfile,
-                                    profiles,
-                                    RouteCharacteristic.LOW_TRAFFIC
-                            );
-                            case THIN_ROADS -> userProfile = this.getProfileForRouteCharacteristic(
-                                    userProfile,
-                                    profiles,
-                                    RouteCharacteristic.LARGE_ROADS
-                            );
-                            case CRIMINAL_AREA -> userProfile = this.getProfileForRouteCharacteristic(
-                                    userProfile,
-                                    profiles,
-                                    RouteCharacteristic.REGULAR_AREA
-                            );
+                            case HIGH_TRAFFIC -> {
+                                final Profile profile = this.getProfileForRouteCharacteristic(
+                                        userProfile,
+                                        profiles,
+                                        RouteCharacteristic.LOW_TRAFFIC
+                                );
+
+                                userProfile = profile != null ? profile : userProfile;
+                            }
+                            case THIN_ROADS -> {
+                                final Profile profile = this.getProfileForRouteCharacteristic(
+                                        userProfile,
+                                        profiles,
+                                        RouteCharacteristic.LARGE_ROADS
+                                );
+
+                                userProfile = profile != null ? profile : userProfile;
+                            }
+                            case CRIMINAL_AREA -> {
+                                final Profile profile = this.getProfileForRouteCharacteristic(
+                                        userProfile,
+                                        profiles,
+                                        RouteCharacteristic.REGULAR_AREA
+                                );
+
+                                userProfile = profile != null ? profile : userProfile;
+                            }
                         }
                     } else if (lastShiftLog.getAverageDrowsiness() > this.config.getMaxDrowsiness() &&
                             problematicShiftsDrowsiness.size() > this.config.getMaxProblematicShifts()) {
@@ -263,45 +277,57 @@ public class ProfilerService {
                                 if (userProfile != null) {
                                     this.setProfile(username, userProfile.getId());
                                 } else {
-                                    System.err.println("Profile is null when trying to change shift (Drowsiness).");
+                                    throw new Exception("Profile is null when trying to change shift (Drowsiness).");
                                 }
                                 return;
                             }
                         }
 
                         switch (this.getMostFrequentRouteCharacteristic(characteristicsFrequencyDrowsiness)) {
-                            case LOW_TRAFFIC -> userProfile = this.getProfileForRouteCharacteristic(
-                                    userProfile,
-                                    profiles,
-                                    RouteCharacteristic.HIGH_TRAFFIC
-                            );
-                            case LARGE_ROADS -> userProfile = this.getProfileForRouteCharacteristic(
-                                    userProfile,
-                                    profiles,
-                                    RouteCharacteristic.THIN_ROADS
+                            case LOW_TRAFFIC -> {
+                                final Profile profile = this.getProfileForRouteCharacteristic(
+                                        userProfile,
+                                        profiles,
+                                        RouteCharacteristic.HIGH_TRAFFIC
+                                );
 
-                            );
-                            case REGULAR_AREA -> userProfile = this.getProfileForRouteCharacteristic(
-                                    userProfile,
-                                    profiles,
-                                    RouteCharacteristic.CRIMINAL_AREA
-                            );
+                                userProfile = profile != null ? profile : userProfile;
+                            }
+                            case LARGE_ROADS -> {
+                                final Profile profile = this.getProfileForRouteCharacteristic(
+                                        userProfile,
+                                        profiles,
+                                        RouteCharacteristic.THIN_ROADS
+                                );
+
+                                userProfile = profile != null ? profile : userProfile;
+                            }
+                            case REGULAR_AREA -> {
+                                final Profile profile = this.getProfileForRouteCharacteristic(
+                                        userProfile,
+                                        profiles,
+                                        RouteCharacteristic.CRIMINAL_AREA
+                                );
+
+                                userProfile = profile != null ? profile : userProfile;
+                            }
                         }
                     }
 
                     if (userProfile != null) {
                         this.setProfile(username, userProfile.getId());
                     } else {
-                        System.err.println("[Profiler Service] Wasn't able to change driver profile.");
+                        throw new Exception("[Profiler Service] Wasn't able to change driver profile.");
                     }
                 } else {
-                    System.err.println("[Profiler Service] Wasn't able to fetch current user profile.");
+                    throw new Exception("[Profiler Service] Wasn't able to fetch current user profile.");
                 }
             } else {
-                System.err.println("[Profiler Service] There is no shift with the specified last shift id.");
+                throw new Exception("[Profiler Service] There is no shift with the specified last shift id.");
             }
         } catch (Exception e) {
-            System.err.println("[Profiler Service] Failed to get routes for one of the driver's shifts.");
+            e.printStackTrace();
+            throw new Exception("[Profiler Service] Failed to get routes for one of the driver's shifts.");
         }
     }
 }
