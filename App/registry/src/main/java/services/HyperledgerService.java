@@ -180,11 +180,12 @@ public class HyperledgerService {
         return this.genson.deserialize(users, new GenericType<List<models.User>>(){});
     }
 
-    public boolean deleteUser(String username) throws IOException, ContractException {
+    public boolean deleteUser(String username) throws IOException, ContractException,
+            InterruptedException, TimeoutException {
         Gateway gateway = this.getGateway();
         Contract contract = this.getContract(gateway);
 
-        byte[] result = contract.evaluateTransaction("deleteUser", username);
+        byte[] result = contract.submitTransaction("deleteUser", username);
 
         gateway.close();
         return Boolean.parseBoolean(new String(result));
