@@ -18,7 +18,7 @@ public class Profile {
 
     public Profile(@JsonProperty("id") String id, @JsonProperty("ageRange") List<Integer> ageRange,
                    @JsonProperty("gender") String gender,
-                   @JsonProperty("shiftHoursRage") List<Integer> shiftHoursRange,
+                   @JsonProperty("shiftHoursRange") List<Integer> shiftHoursRange,
                    @JsonProperty("shiftTypes") List<String> shiftTypes,
                    @JsonProperty("routeIds") List<Integer> routeIds,
                    @JsonProperty("routeCharacteristics") List<String> routeCharacteristics,
@@ -31,6 +31,8 @@ public class Profile {
         shiftTypes.forEach((shiftType) -> {
             this.shiftTypes.add(ShiftType.valueOf(shiftType));
         });
+
+        this.routeCharacteristics = new ArrayList<>();
         routeCharacteristics.forEach((routeCharacteristic) -> {
             this.routeCharacteristics.add(RouteCharacteristic.valueOf(routeCharacteristic));
         });
