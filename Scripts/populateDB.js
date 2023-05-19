@@ -45,7 +45,11 @@ if (!conn.getDBNames().includes(dbName)) {
                 "SHIFT_AFTERNOON",
                 "SHIFT_NIGHT"
             ],
-            slots: 4
+            slots: [
+                2,
+                5,
+                4
+            ]
         },
         {
             id: 750,
@@ -69,7 +73,11 @@ if (!conn.getDBNames().includes(dbName)) {
                 "SHIFT_AFTERNOON",
                 "SHIFT_NIGHT"
             ],
-            slots: 10
+            slots: [
+                10,
+                15,
+                8
+            ]
         },
         {
             id: 720,
@@ -92,7 +100,11 @@ if (!conn.getDBNames().includes(dbName)) {
                 "SHIFT_AFTERNOON",
                 "SHIFT_NIGHT"
             ],
-            slots: 3
+            slots: [
+                1,
+                4,
+                3
+            ]
         }
     ]);
 }
