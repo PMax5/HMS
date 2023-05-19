@@ -14,15 +14,21 @@ import java.util.concurrent.TimeoutException;
 
 public class RegistryService {
 
-    private final RabbitMqService rabbitMqService;
     private final HyperledgerService hyperledgerService;
     private final static String SERVICE_ID = "service_registry";
     private final static int TOKEN_LENGTH = 32;
     private final Map<String, User> authenticatedUsers;
     private Config config;
+    private RabbitMqService rabbitMqService;
 
     public RegistryService(RabbitMqService rabbitMqService) throws Exception {
         this.rabbitMqService = rabbitMqService;
+        this.hyperledgerService = new HyperledgerService();
+        this.authenticatedUsers = new HashMap<>();
+    }
+
+    public RegistryService(Config config) throws Exception {
+        this.config = config;
         this.hyperledgerService = new HyperledgerService();
         this.authenticatedUsers = new HashMap<>();
     }
@@ -63,6 +69,11 @@ public class RegistryService {
     public User registerUser(String username, String name, int age,
                              Gender gender, UserRole userRole, String hashedPassword) {
         try {
+            if (username.isEmpty() || name.isEmpty() || age < 18 || age > 100 || gender == null || userRole == null
+                    || hashedPassword.isEmpty()) {
+                return null;
+            }
+
             return this.hyperledgerService.registerUser(
                     username,
                     name,
@@ -77,7 +88,7 @@ public class RegistryService {
         }
     }
 
-    private String generateToken() {
+    public String generateToken() {
         SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[RegistryService.TOKEN_LENGTH];
         random.nextBytes(bytes);
@@ -89,11 +100,25 @@ public class RegistryService {
         return this.authenticatedUsers.get(token);
     }
 
+    public void insertUserToken(User user, String token) {
+        this.authenticatedUsers.put(token, user);
+    }
+
+    public void removeUserToken(String token) {
+        this.authenticatedUsers.remove(token);
+    }
+
     public String authenticateUser(String username, String hashedPassword) {
         try {
             User user = this.hyperledgerService.login(username, hashedPassword);
             String token = this.generateToken();
-            this.authenticatedUsers.put(token, user);
+
+            if (this.authenticatedUsers.containsValue(user)) {
+                System.out.println("[Registry Service] User " + user.getUsername() + " is already authenticated.");
+                return null;
+            }
+
+            this.insertUserToken(user, token);
 
             System.out.println("[Registry Service] Authenticated user " +
                     user.getUsername() + " successfully with token " + token);
@@ -130,7 +155,7 @@ public class RegistryService {
 
     public boolean deleteUser(String authorToken, String targetUsername) {
         User user = this.getUserByToken(authorToken);
-        if (!user.getRole().equals(UserRole.SUPERVISOR)) {
+        if (user == null || !user.getRole().equals(UserRole.SUPERVISOR)) {
             System.err.println("[Registry Service] Failed to delete user " +
                     targetUsername + ". Insufficient permissions.");
             return false;
@@ -139,7 +164,7 @@ public class RegistryService {
         try {
             System.out.println("[Registry Service] Deleted user " + targetUsername + " successfully.");
             return this.hyperledgerService.deleteUser(targetUsername);
-        } catch (IOException | ContractException e) {
+        } catch (IOException | ContractException | InterruptedException | TimeoutException e) {
             System.err.println("[Registry Service] Failed to delete user " + targetUsername + ": " + e.getMessage());
             return false;
         }
