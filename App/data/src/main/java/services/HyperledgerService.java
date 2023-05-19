@@ -10,6 +10,7 @@ import org.hyperledger.fabric.gateway.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
@@ -101,7 +102,8 @@ public class HyperledgerService {
                 routeId,
                 averageBPM,
                 averageDrowsiness,
-                averageSpeed
+                averageSpeed,
+                Instant.now().getEpochSecond()
         );
 
         byte[] result = contract.submitTransaction(
@@ -111,7 +113,7 @@ public class HyperledgerService {
         );
         gateway.close();
 
-        return this.genson.deserialize(result, ShiftLog.class);
+        return shiftLog;
     }
 
     public List<ShiftLog> getShiftLogsForUser(String userId) throws IOException, ContractException {
