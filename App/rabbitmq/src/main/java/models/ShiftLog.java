@@ -11,12 +11,14 @@ public class ShiftLog {
     private final int averageBPM;
     private final int averageDrowsiness;
     private final int averageSpeed;
+    private final long timestamp;
 
     public ShiftLog(@JsonProperty("userId") String userId, @JsonProperty("shiftId") String shiftId,
                     @JsonProperty("vehicleId") int vehicleId, @JsonProperty("routeId") int routeId,
                     @JsonProperty("averageBPM") int averageBPM,
                     @JsonProperty("averageDrowsiness") int averageDrowsiness,
-                    @JsonProperty("averageSpeed") int averageSpeed) {
+                    @JsonProperty("averageSpeed") int averageSpeed,
+                    @JsonProperty("timestamp") long timestamp) {
         this.userId = userId;
         this.shiftId = shiftId;
         this.vehicleId = vehicleId;
@@ -24,6 +26,7 @@ public class ShiftLog {
         this.averageBPM = averageBPM;
         this.averageDrowsiness = averageDrowsiness;
         this.averageSpeed = averageSpeed;
+        this.timestamp = timestamp;
     }
 
     public String getUserId() { return this.userId; }
@@ -39,4 +42,6 @@ public class ShiftLog {
     public int getAverageDrowsiness() { return this.averageDrowsiness; }
 
     public int getAverageSpeed() { return this.averageSpeed; }
+
+    public long getTimestamp() { return this.timestamp; }
 }
