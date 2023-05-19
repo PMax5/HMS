@@ -17,6 +17,7 @@
         <module>profiler</module>
         <module>gateways</module>
         <module>obu</module>
+        <module>terminal</module>
     </modules>
 
     <properties>
