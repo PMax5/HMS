@@ -29,12 +29,20 @@ public class Profile {
     @Property()
     private final int type;
 
+    @Property()
+    private final List<String> routeCharacteristics;
+
+    @Property()
+    private final long timestamp;
+
     public Profile(@JsonProperty("id") String id, @JsonProperty("ageRange") List<Integer> ageRange,
                    @JsonProperty("gender") String gender,
                    @JsonProperty("shiftHoursRange") List<Integer> shiftHoursRange,
                    @JsonProperty("shiftTypes") List<String> shiftTypes,
                    @JsonProperty("routeIds") List<Integer> routeIds,
-                   @JsonProperty("type") int type) {
+                   @JsonProperty("type") int type,
+                   @JsonProperty("routeCharacteristics") List<String> routeCharacteristics,
+                   @JsonProperty("timestamp") long timestamp) {
         this.id = id;
         this.ageRange = ageRange;
         this.gender = gender;
@@ -42,6 +50,8 @@ public class Profile {
         this.shiftTypes = shiftTypes;
         this.routeIds = routeIds;
         this.type = type;
+        this.routeCharacteristics = routeCharacteristics;
+        this.timestamp = timestamp;
     }
 
     public String getId() {
@@ -78,6 +88,10 @@ public class Profile {
 
     public int getType() { return this.type; }
 
+    public List<String> getRouteCharacteristics() { return this.routeCharacteristics; }
+
+    public long getTimestamp() { return this.timestamp; }
+
     @Override
     public int hashCode() {
         return Objects.hash(
@@ -89,7 +103,9 @@ public class Profile {
                 this.getMinAge(),
                 this.getMinShiftHours(),
                 this.getShiftTypes(),
-                this.getType()
+                this.getType(),
+                this.getRouteCharacteristics(),
+                this.getTimestamp()
         );
     }
 }

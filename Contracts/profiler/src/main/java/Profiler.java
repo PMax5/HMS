@@ -45,6 +45,17 @@ public final class Profiler implements ContractInterface {
     }
 
     @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public Profile QueryProfile(final Context ctx, final String key) {
+        String profileState = ctx.getStub().getStringState(key);
+
+        if (profileState.isEmpty()) {
+            throw new ChaincodeException("Profile " + key + " does not exist.");
+        }
+
+        return genson.deserialize(profileState, Profile.class);
+    }
+
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
     public Profile[] GetProfiles(final Context ctx, final int type) {
         ChaincodeStub stub = ctx.getStub();
         String query = String.format("{ \"selector\": { \"type\": %d } }", type);
@@ -61,5 +72,11 @@ public final class Profiler implements ContractInterface {
         }
 
         return queryResults.toArray(new Profile[0]);
+    }
+
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
+    public void DeleteProfileById(final Context ctx, final String id) {
+        Profile profile = this.QueryProfile(ctx, id);
+        ctx.getStub().delState(profile.getId());
     }
 }
