@@ -314,11 +314,7 @@ public class ProfilerService {
                         }
                     }
 
-                    if (userProfile != null) {
-                        this.setProfile(username, userProfile.getId());
-                    } else {
-                        throw new Exception("[Profiler Service] Wasn't able to change driver profile.");
-                    }
+                    this.setProfile(username, userProfile.getId());
                 } else {
                     throw new Exception("[Profiler Service] Wasn't able to fetch current user profile.");
                 }
