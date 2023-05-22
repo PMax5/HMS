@@ -8,7 +8,6 @@ import models.*;
 import org.hyperledger.fabric.gateway.ContractException;
 import repos.RoutesRepo;
 
-import javax.sound.midi.SysexMessage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,15 +19,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ProfilerService {
-    private final RabbitMqService rabbitMqService;
     private final RoutesRepo routesRepo;
-    private final String serviceId;
     private HyperledgerService hyperledgerService;
+    private RabbitMqService rabbitMqService;
+    private String serviceId;
     private Config config;
+
+    public ProfilerService(Config config) {
+        this.config = config;
+        this.routesRepo = new RoutesRepo(config);
+    }
 
     public ProfilerService(String serviceId, RabbitMqService rabbitMqService) {
         this.rabbitMqService = rabbitMqService;
-        this.routesRepo = new RoutesRepo();
+        this.routesRepo = new RoutesRepo(null);
         this.serviceId = serviceId;
     }
 
@@ -93,6 +97,13 @@ public class ProfilerService {
                                 List<String> shiftTypes, List<Integer> routeIds, List<String> routeCharacteristics,
                                    int type) {
         try {
+
+            if (minAge < 0 || maxAge < 0 || minAge >= maxAge || gender == null || minHours < 0
+                    || maxHours < 0 || minHours >= maxHours || shiftTypes == null ||
+                    routeIds == null || routeCharacteristics == null) {
+                throw new Exception("One of the profile fields is incorrect.");
+            }
+            
             return this.hyperledgerService.registerProfile(
                     minAge,
                     maxAge,
@@ -104,7 +115,7 @@ public class ProfilerService {
                     routeCharacteristics,
                     type
             );
-        } catch (IOException | ContractException | InterruptedException | TimeoutException e) {
+        } catch (Exception e) {
             System.err.println("[Profiler Service] Failed to register profile: " + e.getMessage());
             return null;
         }
