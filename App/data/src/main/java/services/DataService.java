@@ -6,22 +6,33 @@ import com.rabbitmq.client.RpcClientParams;
 import hmsProto.Auth;
 import models.*;
 import org.hyperledger.fabric.gateway.ContractException;
+import repos.Route;
+import repos.RoutesRepo;
+import repos.Vehicle;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DataService {
-    private final RabbitMqService rabbitMqService;
-    private final String serviceId;
+    private final Map<String, Shift> activeShifts;
+    private final RoutesRepo routesRepo;
+    private RabbitMqService rabbitMqService;
+    private String serviceId;
     private HyperledgerService hyperledgerService;
-    private Map<String, Shift> activeShifts;
+
+    public DataService(Config config) {
+        this.routesRepo = new RoutesRepo(config);
+        this.activeShifts = new HashMap<>();
+    }
 
     public DataService(String serviceId, RabbitMqService rabbitMqService) {
         this.serviceId = serviceId;
         this.rabbitMqService = rabbitMqService;
+        this.routesRepo = new RoutesRepo(null);
         this.activeShifts = new HashMap<>();
     }
 
@@ -81,21 +92,49 @@ public class DataService {
         }
     }
 
+    public void removeActiveShift(String username) {
+        this.activeShifts.remove(username);
+    }
+
     public String startShift(String username, int routeId, int vehicleId) {
         if (this.activeShifts.containsKey(username)) {
             System.err.println("[Data Service] User " + username + " tried to start a shift that already started.");
             return null;
+        } else if (routeId < 0 || vehicleId < 0 || username.isEmpty()) {
+            System.err.println("[Data Service] User " + username + " tried to start a shift for an " +
+                    "invalid route/vehicle.");
+            return null;
         }
 
-        String shiftId = UUID.randomUUID().toString();
-        this.activeShifts.put(username, new Shift(
-                username,
-                shiftId,
-                routeId,
-                vehicleId
-        ));
+        try {
+            Route route = this.routesRepo.getRoute(routeId);
+            AtomicReference<Vehicle> vehicle = new AtomicReference<>();
+            route.getVehicles().forEach(v -> {
+                if (v.getId() == vehicleId) {
+                    vehicle.set(v);
+                }
+            });
 
-        return shiftId;
+            if (vehicle.get() == null) {
+                System.err.println("[Data Service] User " + username + " tried to start a shift for an " +
+                        "invalid vehicle.");
+                return null;
+            }
+
+            String shiftId = UUID.randomUUID().toString();
+            this.activeShifts.put(username, new Shift(
+                    username,
+                    shiftId,
+                    routeId,
+                    vehicleId
+            ));
+
+            return shiftId;
+        } catch (Exception e) {
+            System.err.println("[Data Service] Failed to retrieve route or vehicle.");
+            return null;
+        }
+
     }
 
     public ShiftLog endShift(String username) {
@@ -133,6 +172,10 @@ public class DataService {
 
             });
 
+            if (totalBpmValues.get() == 0 || totalDrowsinessValues.get() == 0 || totalSpeedValues.get() == 0) {
+                throw new Exception("One of the VBS lists is empty.");
+            }
+
             return this.hyperledgerService.submitShiftLogData(
                     shift.getUserId(),
                     shift.getShiftId(),
@@ -142,7 +185,7 @@ public class DataService {
                     totalDrowsiness.get() / totalDrowsinessValues.get(),
                     totalSpeed.get() / totalSpeedValues.get()
             );
-        } catch (ContractException | IOException | InterruptedException | TimeoutException e) {
+        } catch (Exception e) {
             System.err.println("[Data Service] Failed to process data logs for user " + shift.getUserId() +
                     ": " + e.getMessage());
             return null;
@@ -166,7 +209,23 @@ public class DataService {
             else if (!this.activeShifts.containsKey(username))
                 throw new Exception("No active shift was found for user: " + username);
 
-            List<Integer> needsRemoval = new ArrayList<>();
+            Route route = this.routesRepo.getRoute(routeId);
+            AtomicReference<Vehicle> vehicle = new AtomicReference<>();
+            route.getVehicles().forEach(v -> {
+                if (v.getId() == vehicleId) {
+                    vehicle.set(v);
+                }
+            });
+
+            if (vehicle.get() == null) {
+                throw new Exception("[Data Service] User " + username + " tried to start a shift for an " +
+                        "invalid vehicle.");
+            }
+
+            List<Integer> finalBpmValues = new ArrayList<>();
+            List<Integer> finalDrowsinessValues = new ArrayList<>();
+            List<Integer> finalSpeedValues = new ArrayList<>();
+            List<Long> finalTimestampValues = new ArrayList<>();
 
             for (int i = 0; i < bpmValues.size(); i++) {
                 int bpmValue = bpmValues.get(i);
@@ -177,7 +236,7 @@ public class DataService {
                 String exceptionMessage = "";
 
                 if (bpmValue < 0 || bpmValue > 200)
-                    exceptionMessage = "Invalid bpm value found: ";
+                    exceptionMessage = "Invalid bpm value found: " + bpmValue;
                 else if (drowsinessValue < 0 || drowsinessValue > 100)
                     exceptionMessage = "Invalid drowsiness value found: " + drowsinessValue;
                 else if (speedValue < 0 || speedValue > 200)
@@ -186,26 +245,23 @@ public class DataService {
                     exceptionMessage = "Invalid timestamp value found: " + timestampValue;
 
                 if (!exceptionMessage.equals("")) {
-                    needsRemoval.add(i);
                     System.out.println("[Data Service] " + exceptionMessage);
+                } else {
+                    finalBpmValues.add(bpmValue);
+                    finalDrowsinessValues.add(drowsinessValue);
+                    finalSpeedValues.add(speedValue);
+                    finalTimestampValues.add(timestampValue);
                 }
-            }
-
-            for (int i: needsRemoval) {
-                bpmValues.remove(i);
-                drowsinessValues.remove(i);
-                speedValues.remove(i);
-                timestampValues.remove(i);
             }
 
             return this.hyperledgerService.submitUserData(
                     username,
                     routeId,
                     vehicleId,
-                    bpmValues,
-                    drowsinessValues,
-                    speedValues,
-                    timestampValues,
+                    finalBpmValues,
+                    finalDrowsinessValues,
+                    finalSpeedValues,
+                    finalTimestampValues,
                     this.activeShifts.get(username).getShiftId()
             );
         } catch (Exception e) {
