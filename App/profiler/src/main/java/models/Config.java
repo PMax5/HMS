@@ -8,6 +8,7 @@ public class Config {
     private final int maxHealthyBPM;
     private final int maxDrowsiness;
     private final int maxProblematicShifts;
+    private String databaseAddress;
 
     public Config(@JsonProperty("hyperledgerUserId") String hyperledgerUserId,
                   @JsonProperty("minHealthyBPM") int minHealthyBPM,
@@ -40,4 +41,10 @@ public class Config {
     public int getMaxProblematicShifts() {
         return this.maxProblematicShifts;
     }
+
+    public void setDatabaseAddress(String address) {
+        this.databaseAddress = address;
+    }
+
+    public String getDatabaseAddress() { return this.databaseAddress; }
 }
