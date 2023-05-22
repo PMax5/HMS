@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UsersRegistration extends RegistryBase {
 
     private final List<String> userIds = Arrays.asList("driver1", "driver2", "driver3");
-    private User supervisor;
     private String supervisorToken;
     private final RegistryService registryService = this.initService();
 
@@ -28,7 +27,7 @@ public class UsersRegistration extends RegistryBase {
         }
 
         supervisorToken = registryService.generateToken();
-        supervisor = new User();
+        User supervisor = new User();
         supervisor.setAge(25);
         supervisor.setGender(Gender.MALE);
         supervisor.setUsername("supervisor1");
