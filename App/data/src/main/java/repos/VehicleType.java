@@ -1,4 +1,4 @@
-package models;
+package repos;
 
 public enum VehicleType {
     SHORT_DISTANCE,

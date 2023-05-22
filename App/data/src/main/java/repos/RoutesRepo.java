@@ -9,7 +9,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import models.Route;
+import models.Config;
 import org.bson.Document;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -18,8 +18,8 @@ public class RoutesRepo {
     private final String databaseAddress;
     private MongoClient mongoClient;
 
-    public RoutesRepo() {
-        this.databaseAddress = System.getenv("CONFIG_DATABASE_ADDRESS");
+    public RoutesRepo(Config config) {
+        this.databaseAddress = config != null ? config.getDatabaseAddress() : System.getenv("CONFIG_DATABASE_ADDRESS");
     }
 
     private MongoDatabase newConnection() {

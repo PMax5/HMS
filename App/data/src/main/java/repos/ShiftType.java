@@ -1,4 +1,4 @@
-package models;
+package repos;
 
 public enum ShiftType {
     SHIFT_MORNING,
