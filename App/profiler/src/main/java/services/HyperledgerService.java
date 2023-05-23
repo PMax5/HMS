@@ -79,6 +79,15 @@ public class HyperledgerService {
         return profile;
     }
 
+    public void deleteProfileById(String profileId) throws IOException,
+            ContractException, InterruptedException, TimeoutException {
+        Gateway gateway = this.getGateway();
+        Contract contract = this.getContract(gateway, PROFILER_CHANNEL, PROFILER_CONTRACT);
+
+        contract.submitTransaction("DeleteProfileById", profileId);
+        gateway.close();
+    }
+
     public List<Profile> getProfiles() throws IOException, ContractException {
         Gateway gateway = this.getGateway();
         Contract contract = this.getContract(gateway, PROFILER_CHANNEL, PROFILER_CONTRACT);
