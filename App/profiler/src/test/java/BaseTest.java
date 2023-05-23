@@ -7,7 +7,7 @@ public class BaseTest {
         try {
             Config config = new Config(
                     "profilerUser",
-                    0,
+                    60,
                     120,
                     60,
                     3
