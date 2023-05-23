@@ -9,10 +9,7 @@ import org.hyperledger.fabric.gateway.ContractException;
 import repos.RoutesRepo;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,16 +21,19 @@ public class ProfilerService {
     private RabbitMqService rabbitMqService;
     private String serviceId;
     private Config config;
+    private List<Profile> profiles;
 
     public ProfilerService(Config config) {
         this.config = config;
         this.routesRepo = new RoutesRepo(config);
+        this.profiles = new ArrayList<>();
     }
 
     public ProfilerService(String serviceId, RabbitMqService rabbitMqService) {
         this.rabbitMqService = rabbitMqService;
         this.routesRepo = new RoutesRepo(null);
         this.serviceId = serviceId;
+        this.profiles = new ArrayList<>();
     }
 
     public Config loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
@@ -98,13 +98,21 @@ public class ProfilerService {
                                    int type) {
         try {
 
-            if (minAge < 0 || maxAge < 0 || minAge >= maxAge || gender == null || minHours < 0
-                    || maxHours < 0 || minHours >= maxHours || shiftTypes == null ||
+            if (minAge < 18 || maxAge < 0 || maxAge >= 67 || minAge >= maxAge || gender == null || minHours < 0 ||
+                    maxHours < 0 || maxHours > 24 || minHours >= maxHours || shiftTypes == null ||
                     routeIds == null || routeCharacteristics == null) {
                 throw new Exception("One of the profile fields is incorrect.");
             }
-            
-            return this.hyperledgerService.registerProfile(
+
+            for (int routeId: routeIds) {
+                this.routesRepo.getRoute(routeId);
+            }
+
+            if (this.profiles.size() <= 0) {
+                this.profiles = this.getProfiles();
+            }
+
+            Profile profile = this.hyperledgerService.registerProfile(
                     minAge,
                     maxAge,
                     gender,
@@ -115,14 +123,45 @@ public class ProfilerService {
                     routeCharacteristics,
                     type
             );
+
+            if (profile != null) {
+                this.profiles.add(profile);
+            }
+
+            return profile;
         } catch (Exception e) {
             System.err.println("[Profiler Service] Failed to register profile: " + e.getMessage());
             return null;
         }
     }
 
+    public boolean deleteProfileById(String profileId) {
+        try {
+            this.hyperledgerService.deleteProfileById(profileId);
+            this.profiles.removeIf(profile -> profile.getId().equals(profileId));
+            return true;
+        } catch(Exception e) {
+            System.err.println("[Profiler Service] Failed to delete profile: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean profileExists(String profileId) {
+        for (Profile profile: this.profiles) {
+            if (profile.getId().equals(profileId)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public boolean setProfile(String username, String profileId) {
         try {
+            if (!this.profileExists(profileId)) {
+                return false;
+            }
+
             this.hyperledgerService.setProfile(username, profileId);
             System.out.println("[Profiler Service] User " + username + " profile was successfully revised to: " +
                     profileId);
@@ -136,14 +175,17 @@ public class ProfilerService {
 
     public List<Profile> getProfiles() {
         try {
-            return this.hyperledgerService.getProfiles();
+            if (this.profiles.size() <= 0) {
+                this.profiles = this.hyperledgerService.getProfiles();
+            }
+            return this.profiles;
         } catch (IOException | ContractException e) {
             System.err.println("[Profiler Service] Failed to get profiles: " + e.getMessage());
             return null;
         }
     }
 
-    private Profile getUserProfile(String username, List<Profile> profiles) throws IOException, ContractException,
+    public Profile getUserProfile(String username, List<Profile> profiles) throws IOException, ContractException,
             InterruptedException, TimeoutException {
         String profileId = this.hyperledgerService.getUserProfile(username);
         for (Profile profile: profiles) {
