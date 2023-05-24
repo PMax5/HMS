@@ -131,7 +131,7 @@ public class DataService {
 
             return shiftId;
         } catch (Exception e) {
-            System.err.println("[Data Service] Failed to retrieve route or vehicle.");
+            System.err.println("[Data Service] Failed to retrieve route or vehicle: " + e.getMessage());
             return null;
         }
 
