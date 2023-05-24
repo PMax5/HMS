@@ -376,7 +376,7 @@ public class ProfilerService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new Exception("[Profiler Service] Failed to get routes for one of the driver's shifts.");
+            throw new Exception("[Profiler Service] Failed to get routes for one of the driver's shifts: " + e.getMessage());
         }
     }
 }
