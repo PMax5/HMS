@@ -65,6 +65,10 @@ public class ProfilerTest extends BaseTest {
         profiles.add(profile1);
         profiles.add(profile2);
         profiles.add(profile3);
+
+        System.out.println("Profile 1 --> " + profile1.getId());
+        System.out.println("Profile 2 --> " + profile2.getId());
+        System.out.println("Profile 3 --> " + profile3.getId());
     }
 
     @Test
@@ -231,7 +235,7 @@ public class ProfilerTest extends BaseTest {
     @Test
     public void getProfiles() {
         List<Profile> profiles = profilerService.getProfiles();
-        
+
         assertNotNull(profiles);
         assertEquals(profiles.size(), this.profiles.size());
     }
