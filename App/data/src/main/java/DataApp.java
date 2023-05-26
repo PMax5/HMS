@@ -4,19 +4,28 @@ import com.rabbitmq.client.Delivery;
 import hmsProto.Auth;
 import hmsProto.Data;
 import models.*;
+import org.hyperledger.fabric.sdk.User;
 import services.DataService;
 import services.RabbitMqService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class DataApp {
     public static void main(String[] args) {
         try {
             final String SERVICE_ID = "service_data";
+            final int NUMBER_OF_THREADS = 1000;
+
             RabbitMqService rabbitMqService = new RabbitMqService();
             DataService dataService = new DataService(SERVICE_ID, rabbitMqService);
+
+            Map<String, UserRole> rolesCache = new TreeMap<>();
 
             Config config = dataService.loadServiceConfig();
             System.out.println("[Data App] Initializing server...");
@@ -25,12 +34,13 @@ public class DataApp {
             RpcServer dataServer = rabbitMqService.newRpcServer(SERVICE_ID);
             Channel channel = dataServer.getChannel();
 
+            ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
             dataServer.addOperationHandler(Operations.SUBMIT_USER_DATALOG, new Operation() {
                 @Override
                 public void execute(String consumerTag, Delivery delivery) throws IOException {
                     Data.SubmitDataLogRequest request = Data.SubmitDataLogRequest.parseFrom(delivery.getBody());
 
-                    UserRole role = dataService.authorizeUser(request.getToken());
+                    UserRole role = rolesCache.get(request.getToken());
                     Data.DataResponse.Builder responseBuilder = Data.DataResponse.newBuilder();
                     if (role.equals(UserRole.DRIVER)) {
                         Data.DataRequest dataRequest = request.getDataLogs();
@@ -68,7 +78,7 @@ public class DataApp {
                 public void execute(String consumerTag, Delivery delivery) throws IOException {
                     Data.GetDataLogRequest request = Data.GetDataLogRequest.parseFrom(delivery.getBody());
 
-                    UserRole role = dataService.authorizeUser(request.getToken());
+                    UserRole role = rolesCache.get(request.getToken());
                     Data.GetDataLogResponse.Builder responseBuilder = Data.GetDataLogResponse.newBuilder();
 
                     if (role.equals(UserRole.HEALTH_STAFF)) {
@@ -112,6 +122,8 @@ public class DataApp {
                     Data.StartShiftRequest request = Data.StartShiftRequest.parseFrom(delivery.getBody());
 
                     UserRole role = dataService.authorizeUser(request.getToken());
+                    rolesCache.put(request.getToken(), role);
+
                     Data.StartShiftResponse.Builder responseBuilder = Data.StartShiftResponse.newBuilder();
 
                     if (role.equals(UserRole.DRIVER)) {
@@ -148,7 +160,7 @@ public class DataApp {
                 public void execute(String consumerTag, Delivery delivery) throws IOException {
                     Data.EndShiftRequest request = Data.EndShiftRequest.parseFrom(delivery.getBody());
 
-                    UserRole role = dataService.authorizeUser(request.getToken());
+                    UserRole role = rolesCache.get(request.getToken());
                     Data.EndShiftResponse.Builder responseBuilder = Data.EndShiftResponse.newBuilder();
 
                     if (role.equals(UserRole.DRIVER)) {
@@ -170,6 +182,7 @@ public class DataApp {
                         );
                     }
 
+                    rolesCache.remove(request.getToken());
                     dataServer.sendResponseAndAck(delivery, responseBuilder.build().toByteArray());
                 }
             });
@@ -210,8 +223,14 @@ public class DataApp {
             });
 
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
-                System.out.println("[Data App] Received new operation request!");
-                dataServer.executeOperationHandler(delivery);
+                executorService.submit(() -> {
+                    try {
+                        System.out.println("[Data App] Received new operation request!");
+                        dataServer.executeOperationHandler(delivery);
+                    } catch (IOException e) {
+                        System.err.println("[Data App] Unexpected error occurred: " + e.getMessage());
+                    }
+                });
             };
 
             channel.basicConsume(SERVICE_ID, false, mainHandler, (consumerTag -> {}));
