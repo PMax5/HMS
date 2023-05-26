@@ -12,6 +12,10 @@ public class OBUApp {
     private static final String END_SHIFT_COMMAND = "endshift";
     private static final String DATA_COMMAND = "data";
     private static final String DATA_SUBMIT_COMMAND = "datasubmit";
+    private static final String BULK_DATA_SUBMIT_COMMAND = "bulkdatasubmit";
+    private static final String ASYNC_BULK_DATA_SUBMIT_COMMAND = "asyncbulkdatasubmit";
+    private static final String BULK_LOGIN_USER_COMMAND = "bulklogin";
+    private static final String BULK_END_SHIFT_COMMAND = "bulkendshift";
 
     public static void main(String[] args) {
         System.out.println("On Board Unit Initializing...");
@@ -46,6 +50,19 @@ public class OBUApp {
                                 obuService.addTimestamp(Integer.parseInt(command.get(4)));
                             }
                             case DATA_SUBMIT_COMMAND -> obuService.submitUserData();
+                            case BULK_DATA_SUBMIT_COMMAND -> obuService.bulkSubmitUserData(
+                                    Integer.parseInt(command.get(1)));
+                            case ASYNC_BULK_DATA_SUBMIT_COMMAND -> obuService.asyncBulkSubmitUserData(
+                                    Integer.parseInt(command.get(1))
+                            );
+                            case BULK_LOGIN_USER_COMMAND -> obuService.bulkLoginUser(
+                                    command.get(1),
+                                    command.get(2),
+                                    Integer.parseInt(command.get(3))
+                            );
+                            case BULK_END_SHIFT_COMMAND -> obuService.bulkEndShift(
+                                    Integer.parseInt(command.get(1))
+                            );
                         }
                     } catch(OBUException e) {
                         testsService.writeToOutputFile("[OBU Service Exception] " + e.getMessage());
