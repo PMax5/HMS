@@ -56,6 +56,7 @@ public class ConfigApp {
 
             channel.basicConsume(configQueueName, false, mainHandler, (consumerTag -> {}));
         } catch (IOException | TimeoutException e) {
+            e.printStackTrace();
             System.err.println("[Config App] Unexpected error occurred: " + e.getMessage());
         }
     }

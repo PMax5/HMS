@@ -1,0 +1,10 @@
+login driver8 something
+startshift 750 4245
+data 100 20 50 1681730911
+data 80 20 30 1681730909
+data 90 30 40 1681730907
+data 85 20 35 1681730906
+data 80 40 50 1681730905
+asyncbulkdatasubmit 200
+endshift
+logout
