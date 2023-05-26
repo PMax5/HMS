@@ -10,12 +10,16 @@ import services.RabbitMqService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class ProfilerApp {
     public static void main(String[] args) {
         try {
             final String SERVICE_ID = "service_profiler";
+            final int NUMBER_OF_THREADS = 1000;
+
             RabbitMqService rabbitMqService = new RabbitMqService();
             ProfilerService profilerService = new ProfilerService(SERVICE_ID, rabbitMqService);
 
@@ -26,6 +30,7 @@ public class ProfilerApp {
             RpcServer profilerServer = rabbitMqService.newRpcServer(SERVICE_ID);
             Channel channel = profilerServer.getChannel();
 
+            ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
             profilerServer.addOperationHandler(Operations.REGISTER_PROFILE, new Operation() {
                 @Override
                 public void execute(String consumerTag, Delivery delivery) throws IOException {
@@ -222,8 +227,14 @@ public class ProfilerApp {
             });
 
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
-                System.out.println("[Profiler App] Received new operation request!");
-                profilerServer.executeOperationHandler(delivery);
+                executorService.submit(() -> {
+                    try {
+                        System.out.println("[Profiler App] Received new operation request!");
+                        profilerServer.executeOperationHandler(delivery);
+                    } catch (IOException e) {
+                        System.err.println("[Profiler App] Unexpected error occurred: " + e.getMessage());
+                    }
+                });
             };
 
             channel.basicConsume(SERVICE_ID, false, mainHandler, (consumerTag -> {}));
