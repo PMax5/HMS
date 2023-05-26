@@ -6,29 +6,34 @@ import hmsProto.Data;
 import hmsProto.GatewaysGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class OBUService implements AutoCloseable {
 
-    private final GatewaysGrpc.GatewaysBlockingStub stub;
+    private final GatewaysGrpc.GatewaysBlockingStub blockingStub;
+    private final GatewaysGrpc.GatewaysStub asyncStub;
     private final ManagedChannel channel;
+    private final List<Integer> bpm;
+    private final List<Integer> drowsiness;
+    private final List<Integer> speeds;
+    private final List<Long> timestamps;
     private String userToken;
     private String username;
     private String shiftId;
     private int routeId;
     private int vehicleId;
-    private List<Integer> bpm;
-    private List<Integer> drowsiness;
-    private List<Integer> speeds;
-    private List<Long> timestamps;
 
     public OBUService(String host, int port) {
         this.channel = ManagedChannelBuilder.forAddress(host, port)
                 .usePlaintext()
                 .build();
-        this.stub = GatewaysGrpc.newBlockingStub(this.channel);
+        this.blockingStub = GatewaysGrpc.newBlockingStub(this.channel);
+        this.asyncStub = GatewaysGrpc.newStub(this.channel);
         this.bpm = new ArrayList<>();
         this.drowsiness = new ArrayList<>();
         this.speeds = new ArrayList<>();
@@ -42,7 +47,7 @@ public class OBUService implements AutoCloseable {
                 .build();
 
         System.out.println("[OBU Service] Logging in user: " + username);
-        Auth.UserAuthenticationResponse authenticationResponse = this.stub.authenticateUser(authenticationRequest);
+        Auth.UserAuthenticationResponse authenticationResponse = this.blockingStub.authenticateUser(authenticationRequest);
         if (authenticationResponse.hasErrorMessage()) {
             throw new OBUException(authenticationResponse.getErrorMessage().getDescription());
         }
@@ -50,6 +55,50 @@ public class OBUService implements AutoCloseable {
 
         this.userToken = authenticationResponse.getToken();
         this.username = username;
+    }
+
+    public void bulkLoginUser(String username, String password, int iterations) throws OBUException {
+        long startTime = Instant.now().getEpochSecond();
+
+        final int[] counter = {0};
+        for (int i = 0; i < iterations; i++) {
+            Auth.UserAuthenticationRequest authenticationRequest = Auth.UserAuthenticationRequest.newBuilder()
+                    .setUsername(username)
+                    .setPassword(password)
+                    .build();
+
+            System.out.println("[OBU Service] Logging in user: " + username);
+
+            int finalI = i;
+            this.asyncStub.authenticateUser(authenticationRequest, new StreamObserver<Auth.UserAuthenticationResponse>() {
+                @Override
+                public void onNext(Auth.UserAuthenticationResponse userAuthenticationResponse) {
+                    if (userAuthenticationResponse.hasErrorMessage()) {
+                        System.err.println("[OBU Service] " + userAuthenticationResponse.getErrorMessage());
+                    }
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+
+                }
+
+                @Override
+                public void onCompleted() {
+                    if (counter[0] == iterations - 1) {
+                        long endTime = Instant.now().getEpochSecond();
+                        float throughput = (float) iterations / (endTime - startTime);
+                        System.out.println("[OBU Service] Time: " +
+                                TimeUnit.SECONDS.toSeconds(endTime - startTime));
+                        System.out.println("[OBU Service] Service throughput: " + throughput);
+                    } else {
+                        counter[0] = counter[0] + 1;
+                    }
+
+                    System.out.println("[OBU Service] Response from API Gateways for iteration " + finalI);
+                }
+            });
+        }
     }
 
     public void logoutUser() throws OBUException {
@@ -62,7 +111,7 @@ public class OBUService implements AutoCloseable {
                 .build();
 
         System.out.println("[OBU Service] Logging out user: " + this.username);
-        Auth.UserLogoutResponse logoutResponse = this.stub.logoutUser(logoutRequest);
+        Auth.UserLogoutResponse logoutResponse = this.blockingStub.logoutUser(logoutRequest);
         if (logoutResponse.hasErrorMessage()) {
             throw new OBUException(logoutResponse.getErrorMessage().getDescription());
         }
@@ -87,7 +136,7 @@ public class OBUService implements AutoCloseable {
                 .setVehicleId(vehicleId)
                 .build();
 
-        Data.StartShiftResponse startShiftResponse = this.stub.startShift(startShiftRequest);
+        Data.StartShiftResponse startShiftResponse = this.blockingStub.startShift(startShiftRequest);
         if (startShiftResponse.hasErrorMessage()) {
             throw new OBUException(startShiftResponse.getErrorMessage().getDescription());
         }
@@ -105,7 +154,7 @@ public class OBUService implements AutoCloseable {
                 .build();
 
         System.out.println("[OBU Service] Sending end shift request for user: " + this.username);
-        Data.EndShiftResponse endShiftResponse = this.stub.endShift(endShiftRequest);
+        Data.EndShiftResponse endShiftResponse = this.blockingStub.endShift(endShiftRequest);
         if (endShiftResponse.hasErrorMessage()) {
             throw new OBUException(endShiftResponse.getErrorMessage().getDescription());
         }
@@ -118,7 +167,130 @@ public class OBUService implements AutoCloseable {
         System.out.println("[OBU Service] Ended shift for user: " + this.username);
     }
 
+    public void bulkEndShift(int iterations) {
+        Data.EndShiftRequest endShiftRequest = Data.EndShiftRequest.newBuilder()
+                .setToken(this.userToken)
+                .setUsername(this.username)
+                .build();
+
+        System.out.println("[OBU Service] Sending end shift request for user: " + this.username);
+        long startTime = Instant.now().getEpochSecond();
+
+        final int[] counter = {0};
+        for (int i = 0; i < iterations; i++) {
+
+            int finalI = i;
+            this.asyncStub.endShift(endShiftRequest, new StreamObserver<Data.EndShiftResponse>() {
+                @Override
+                public void onNext(Data.EndShiftResponse endShiftResponse) {
+                    if (endShiftResponse.hasErrorMessage()) {
+                        System.err.println("[OBU Service] " + endShiftResponse.getErrorMessage());
+                    }
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+
+                }
+
+                @Override
+                public void onCompleted() {
+                    if (counter[0] == iterations - 1) {
+                        long endTime = Instant.now().getEpochSecond();
+                        float throughput = (float) iterations / (endTime - startTime);
+                        System.out.println("[OBU Service] Time: " +
+                                TimeUnit.SECONDS.toSeconds(endTime - startTime));
+                        System.out.println("[OBU Service] Service throughput: " + throughput);
+                    } else {
+                        counter[0] = counter[0] + 1;
+                    }
+
+                    System.out.println("[OBU Service] Response from API Gateways for iteration " + finalI);
+                }
+            });
+
+            System.out.println("[OBU Service] Finished shift for user: " + this.username + ". Iteration #" + i);
+        }
+    }
+
     public void submitUserData() throws OBUException {
+        Data.SubmitDataLogRequest submitDataLogRequest = getSubmitDataLogRequest();
+
+        Data.SubmitDataLogResponse submitDataLogResponse = this.blockingStub.submitUserData(submitDataLogRequest);
+        if (submitDataLogResponse.hasErrorMessage()) {
+            throw new OBUException(submitDataLogResponse.getErrorMessage().getDescription());
+        }
+
+        this.resetData();
+        System.out.println("[OBU Service] Submitted data for user: " + this.username);
+    }
+
+    public void bulkSubmitUserData(int iterations) throws OBUException {
+
+        long startTime = Instant.now().getEpochSecond();
+
+        for (int i = 0; i < iterations; i++) {
+            Data.SubmitDataLogRequest submitDataLogRequest = getSubmitDataLogRequest();
+
+            Data.SubmitDataLogResponse submitDataLogResponse = this.blockingStub.submitUserData(submitDataLogRequest);
+            if (submitDataLogResponse.hasErrorMessage()) {
+                throw new OBUException(submitDataLogResponse.getErrorMessage().getDescription());
+            }
+
+            System.out.println("[OBU Service] Submitted data for user: " + this.username + ". Iteration #" + i);
+        }
+
+        long endTime = Instant.now().getEpochSecond();
+        float throughput = (float) iterations / (endTime - startTime);
+        System.out.println("[OBU Service] Time: " + TimeUnit.SECONDS.toSeconds(endTime - startTime));
+        System.out.println("[OBU Service] Service throughput: " + throughput);
+        System.out.println("[OBU Service] Submitted bulk data for user: " + this.username);
+    }
+
+    public void asyncBulkSubmitUserData(int iterations) throws OBUException {
+        long startTime = Instant.now().getEpochSecond();
+
+        final int[] counter = {0};
+        for (int i = 0; i < iterations; i++) {
+            Data.SubmitDataLogRequest submitDataLogRequest = getSubmitDataLogRequest();
+
+            int finalI = i;
+            this.asyncStub.submitUserData(submitDataLogRequest, new StreamObserver<Data.SubmitDataLogResponse>() {
+                @Override
+                public void onNext(Data.SubmitDataLogResponse submitDataLogResponse) {
+                    if (submitDataLogResponse.hasErrorMessage()) {
+                        System.err.println("[OBU Service] " + submitDataLogResponse.getErrorMessage());
+                    }
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+
+                }
+
+                @Override
+                public void onCompleted() {
+                    if (counter[0] == iterations - 1) {
+                        long endTime = Instant.now().getEpochSecond();
+                        float throughput = (float) iterations / (endTime - startTime);
+                        System.out.println("[OBU Service] Time: " +
+                                TimeUnit.SECONDS.toSeconds(endTime - startTime));
+                        System.out.println("[OBU Service] Service throughput: " + throughput);
+                    } else {
+                        counter[0] = counter[0] + 1;
+                    }
+
+                    System.out.println("[OBU Service] Response from API Gateways for iteration " + finalI);
+                }
+            });
+
+            System.out.println("[OBU Service] Submitted data for user: " + this.username + ". Iteration #" + i);
+        }
+
+        System.out.println("[OBU Service] Submitted bulk data for user: " + this.username);
+    }
+
+    private Data.SubmitDataLogRequest getSubmitDataLogRequest() {
         Data.DataRequest dataRequest = Data.DataRequest.newBuilder()
                 .setDriverId(this.username)
                 .setRouteId(this.routeId)
@@ -130,19 +302,11 @@ public class OBUService implements AutoCloseable {
                 .setShiftId(this.shiftId)
                 .build();
 
-        Data.SubmitDataLogRequest submitDataLogRequest = Data.SubmitDataLogRequest.newBuilder()
+        return Data.SubmitDataLogRequest.newBuilder()
                 .setDataLogs(dataRequest)
                 .setToken(this.userToken)
                 .setShiftId(this.shiftId)
                 .build();
-
-        Data.SubmitDataLogResponse submitDataLogResponse = this.stub.submitUserData(submitDataLogRequest);
-        if (submitDataLogResponse.hasErrorMessage()) {
-            throw new OBUException(submitDataLogResponse.getErrorMessage().getDescription());
-        }
-
-        this.resetData();
-        System.out.println("[OBU Service] Submitted data for user: " + this.username);
     }
 
     public void addBpm(int bpm) {
