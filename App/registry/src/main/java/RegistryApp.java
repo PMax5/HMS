@@ -7,11 +7,14 @@ import services.RabbitMqService;
 import services.RegistryService;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class RegistryApp {
     public static void main(String[] args) {
         try {
             final String SERVICE_ID = "service_registry";
+            final int NUMBER_OF_THREADS = 1000;
             RabbitMqService rabbitMqService = new RabbitMqService();
             RegistryService registryService = new RegistryService(rabbitMqService);
 
@@ -22,6 +25,7 @@ public class RegistryApp {
             RpcServer registryServer = rabbitMqService.newRpcServer(SERVICE_ID);
             Channel channel = registryServer.getChannel();
 
+            ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
             registryServer.addOperationHandler(Operations.NEW_USER_REQUEST, new Operation() {
                         @Override
                         public void execute(String consumerTag, Delivery delivery) throws IOException {
@@ -175,8 +179,14 @@ public class RegistryApp {
             );
 
             DeliverCallback mainHandler = (consumerTag, delivery) -> {
-                System.out.println("[Registry App] Received new operation request!");
-                registryServer.executeOperationHandler(delivery);
+                executorService.submit(() -> {
+                    try {
+                        System.out.println("[Registry App] Received new operation request!");
+                        registryServer.executeOperationHandler(delivery);
+                    } catch (IOException e) {
+                        System.err.println("[Registry App] Unexpected error occurred: " + e.getMessage());
+                    }
+                });
             };
 
             channel.basicConsume(SERVICE_ID, false, mainHandler, (consumerTag -> {}));
