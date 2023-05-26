@@ -56,6 +56,7 @@
                 </executions>
                 <configuration>
                     <mainClass>${mainClass}</mainClass>
+                    <daemonThreadJoinTimeout>100000</daemonThreadJoinTimeout>
                     <arguments>
                         <argument>${host}</argument>
                         <argument>${port}</argument>
