@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class DataService {
     private final Map<String, Shift> activeShifts;
+    private final Map<Integer, Route> routesCache;
     private final RoutesRepo routesRepo;
     private RabbitMqService rabbitMqService;
     private String serviceId;
@@ -27,6 +28,7 @@ public class DataService {
     public DataService(Config config) {
         this.routesRepo = new RoutesRepo(config);
         this.activeShifts = new HashMap<>();
+        this.routesCache = new HashMap<>();
     }
 
     public DataService(String serviceId, RabbitMqService rabbitMqService) {
@@ -34,6 +36,7 @@ public class DataService {
         this.rabbitMqService = rabbitMqService;
         this.routesRepo = new RoutesRepo(null);
         this.activeShifts = new HashMap<>();
+        this.routesCache = new HashMap<>();
     }
 
     public void loadHyperledgerService(Config config) throws Exception {
@@ -107,8 +110,11 @@ public class DataService {
         }
 
         try {
-            Route route = this.routesRepo.getRoute(routeId);
+            if (!this.routesCache.containsKey(routeId)) {
+                this.routesCache.put(routeId, this.routesRepo.getRoute(routeId));
+            }
             AtomicReference<Vehicle> vehicle = new AtomicReference<>();
+            Route route = this.routesCache.get(routeId);
             route.getVehicles().forEach(v -> {
                 if (v.getId() == vehicleId) {
                     vehicle.set(v);
@@ -145,6 +151,9 @@ public class DataService {
 
         ShiftLog shiftLog = this.processShiftData(this.activeShifts.get(username));
         this.activeShifts.remove(username);
+        if (shiftLog != null) {
+            this.routesCache.remove(shiftLog.getRouteId());
+        }
         System.out.println("[Data Service] Ended shift for user: " + username);
         return shiftLog;
     }
@@ -194,6 +203,7 @@ public class DataService {
 
     public List<ShiftLog> getShiftLogsForUser(String userId) {
         try {
+            System.out.println("HERE!");
             return this.hyperledgerService.getShiftLogsForUser(userId);
         } catch (ContractException | IOException e) {
             System.err.println("[Data Service] Failed to get data logs for user " + userId + ": " + e.getMessage());
@@ -209,7 +219,11 @@ public class DataService {
             else if (!this.activeShifts.containsKey(username))
                 throw new Exception("No active shift was found for user: " + username);
 
-            Route route = this.routesRepo.getRoute(routeId);
+            if (!this.routesCache.containsKey(routeId)) {
+                this.routesCache.put(routeId, this.routesRepo.getRoute(routeId));
+            }
+
+            Route route = this.routesCache.get(routeId);
             AtomicReference<Vehicle> vehicle = new AtomicReference<>();
             route.getVehicles().forEach(v -> {
                 if (v.getId() == vehicleId) {
