@@ -1,0 +1,3 @@
+login supervisor1 something
+registerProfile 20 25 MALE 10 20 SHIFT_MORNING,SHIFT_AFTERNOON 750 CRIMINAL_AREA,HIGH_TRAFFIC 1
+logout
