@@ -151,29 +151,31 @@ public class ProfilerApp {
                             );
                         } else {
                             List<Profiler.Profile> protoProfiles = new ArrayList<>();
-                            for (Profile p : profiles) {
+                            System.out.println(profiles.size());
+                            for (Profile profile : profiles) {
                                 Profiler.Profile protoProfile = Profiler.Profile.newBuilder()
-                                        .setId(p.getId())
+                                        .setId(profile.getId())
                                         .setAgeRange(Profiler.Interval.newBuilder()
-                                                .setMin(p.getMinAge())
-                                                .setMax(p.getMaxAge())
+                                                .setMin(profile.getMinAge())
+                                                .setMax(profile.getMaxAge())
                                                 .build()
                                         )
-                                        .setGender(Auth.GENDER.valueOf(p.getGender().toString()))
+                                        .setGender(Auth.GENDER.valueOf(profile.getGender().toString()))
                                         .setShiftHoursRange(Profiler.Interval.newBuilder()
-                                                .setMin(p.getMinShiftHours())
-                                                .setMax(p.getMaxShiftHours())
+                                                .setMin(profile.getMinShiftHours())
+                                                .setMax(profile.getMaxShiftHours())
                                                 .build()
                                         )
-                                        .addAllShiftTypes(p.getShiftTypes()
+                                        .addAllShiftTypes(profile.getShiftTypes()
                                                 .stream()
                                                 .map(t -> Profiler.SHIFT_TYPE.valueOf(t.toString()))
                                                 .collect(Collectors.toList())
                                         )
-                                        .addAllRouteIds(p.getRouteIds())
-                                        .build();
+                                        .addAllRouteIds(profile.getRouteIds()).build();
 
                                 protoProfiles.add(protoProfile);
+                                System.out.println("[Profiler App] Adding profile " +
+                                        profile.getId() + " to response list.");
                             }
 
                             responseBuilder.addAllProfiles(protoProfiles);
