@@ -203,7 +203,6 @@ public class DataService {
 
     public List<ShiftLog> getShiftLogsForUser(String userId) {
         try {
-            System.out.println("HERE!");
             return this.hyperledgerService.getShiftLogsForUser(userId);
         } catch (ContractException | IOException e) {
             System.err.println("[Data Service] Failed to get data logs for user " + userId + ": " + e.getMessage());
