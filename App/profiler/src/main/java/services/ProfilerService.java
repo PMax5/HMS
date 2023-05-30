@@ -6,6 +6,8 @@ import com.rabbitmq.client.RpcClientParams;
 import hmsProto.Auth;
 import models.*;
 import org.hyperledger.fabric.gateway.ContractException;
+import org.hyperledger.fabric.sdk.BlockEvent;
+import org.hyperledger.fabric.sdk.exception.TransactionEventException;
 import repos.RoutesRepo;
 
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ProfilerService {
     private final RoutesRepo routesRepo;
+    private final Map<Integer, Route> routesCache;
     private HyperledgerService hyperledgerService;
     private RabbitMqService rabbitMqService;
     private String serviceId;
@@ -27,6 +30,7 @@ public class ProfilerService {
         this.config = config;
         this.routesRepo = new RoutesRepo(config);
         this.profiles = new ArrayList<>();
+        this.routesCache = new TreeMap<>();
     }
 
     public ProfilerService(String serviceId, RabbitMqService rabbitMqService) {
@@ -34,6 +38,7 @@ public class ProfilerService {
         this.routesRepo = new RoutesRepo(null);
         this.serviceId = serviceId;
         this.profiles = new ArrayList<>();
+        this.routesCache = new TreeMap<>();
     }
 
     public Config loadServiceConfig() throws IOException, TimeoutException, ExecutionException, InterruptedException {
@@ -126,6 +131,7 @@ public class ProfilerService {
 
             if (profile != null) {
                 this.profiles.add(profile);
+                System.out.println("[Profiler Service] Successfully registered new profile: " + profile.getId());
             }
 
             return profile;
@@ -169,6 +175,13 @@ public class ProfilerService {
         } catch (IOException | ContractException | InterruptedException | TimeoutException e) {
             System.err.println("[Profiler Service] Failed to set profile " + profileId + " for user " + username + ": "
                     + e.getMessage());
+
+            Throwable cause = e.getCause();
+            if (cause instanceof TransactionEventException) {
+                BlockEvent.TransactionEvent txEvent = ((TransactionEventException) cause).getTransactionEvent();
+                byte validationCode = txEvent.getValidationCode();
+                System.err.println(String.valueOf(validationCode));
+            }
             return false;
         }
     }
@@ -178,6 +191,8 @@ public class ProfilerService {
             if (this.profiles.size() <= 0) {
                 this.profiles = this.hyperledgerService.getProfiles();
             }
+
+            System.out.println("[Profiler Service] Fetching all profiles.");
             return this.profiles;
         } catch (IOException | ContractException e) {
             System.err.println("[Profiler Service] Failed to get profiles: " + e.getMessage());
@@ -251,7 +266,10 @@ public class ProfilerService {
                 }
 
                 final int routeId = shiftLog.getRouteId();
-                Route route = this.routesRepo.getRoute(routeId);
+                if(!this.routesCache.containsKey(routeId)) {
+                    this.routesCache.put(routeId, this.routesRepo.getRoute(routeId));
+                }
+                Route route = this.routesCache.get(routeId);
                 if (shiftLog.getAverageBPM() > this.config.getMaxHealthyBPM()) {
                     problematicShiftsBPM.add(shiftLog);
                     route.getCharacteristics().forEach(routeCharacteristic -> {
@@ -328,11 +346,10 @@ public class ProfilerService {
                             if (shiftType.equals(ShiftType.SHIFT_NIGHT)) {
                                 userProfile = this.getProfileForShiftType(profiles, ShiftType.SHIFT_MORNING);
                                 if (userProfile != null) {
-                                    this.setProfile(username, userProfile.getId());
+                                    return;
                                 } else {
                                     throw new Exception("Profile is null when trying to change shift (Drowsiness).");
                                 }
-                                return;
                             }
                         }
 
