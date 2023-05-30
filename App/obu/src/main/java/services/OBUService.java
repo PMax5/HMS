@@ -168,6 +168,12 @@ public class OBUService implements AutoCloseable {
     }
 
     public void bulkEndShift(int iterations) {
+        try {
+            System.out.println("Waiting 2 minutes...");
+            Thread.sleep(3 * 60 * 1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         Data.EndShiftRequest endShiftRequest = Data.EndShiftRequest.newBuilder()
                 .setToken(this.userToken)
                 .setUsername(this.username)
