@@ -6,7 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import services.ProfilerService;
 
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -410,6 +414,151 @@ public class ProfilerTest extends BaseTest {
             Profile profile = profilerService.getUserProfile(USERNAME, profiles);
 
             assertEquals(profile.getId(), NORMAL_PROFILE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void massTestProfileChanges() {
+        String uuid = UUID.randomUUID().toString();
+        ShiftLog shiftLog = new ShiftLog(
+                USERNAME,
+                uuid,
+                4245,
+                750,
+                100,
+                70,
+                50,
+                1681730911L
+        );
+
+        ShiftLog shiftLog1 = new ShiftLog(
+                USERNAME,
+                uuid,
+                4245,
+                750,
+                100,
+                70,
+                50,
+                1681730912L
+        );
+
+        ShiftLog shiftLog2 = new ShiftLog(
+                USERNAME,
+                uuid,
+                4245,
+                750,
+                100,
+                70,
+                50,
+                1681730913L
+        );
+
+        ShiftLog shiftLog3 = new ShiftLog(
+                USERNAME,
+                uuid,
+                4245,
+                750,
+                100,
+                70,
+                50,
+                1681730914L
+        );
+
+        ShiftLog shiftLog4 = new ShiftLog(
+                USERNAME,
+                uuid,
+                4245,
+                750,
+                100,
+                70,
+                50,
+                1681730914L
+        );
+
+        ShiftLog shiftLog5 = new ShiftLog(
+                USERNAME,
+                uuid,
+                4245,
+                750,
+                100,
+                70,
+                50,
+                1681730914L
+        );
+
+        ShiftLog shiftLog6 = new ShiftLog(
+                USERNAME,
+                uuid,
+                4245,
+                750,
+                100,
+                70,
+                50,
+                1681730914L
+        );
+
+        ShiftLog shiftLog7 = new ShiftLog(
+                USERNAME,
+                uuid,
+                4245,
+                750,
+                100,
+                70,
+                50,
+                1681730914L
+        );
+
+        ShiftLog shiftLog8 = new ShiftLog(
+                USERNAME,
+                uuid,
+                4245,
+                750,
+                100,
+                70,
+                50,
+                1681730914L
+        );
+
+        try {
+            profilerService.setProfile(USERNAME, NORMAL_PROFILE);
+            long startTime = Instant.now().getEpochSecond();
+            final int NUMBER_OF_THREADS = 1000;
+            ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+
+            System.out.println(startTime);
+            final int[] counter = {0};
+            final int iterations = 300;
+            for (int i = 0; i < iterations; i++) {
+                int finalI = i;
+                executorService.submit(() -> {
+                    try {
+                        profilerService.analyizeDriverData(USERNAME, uuid,
+                                Arrays.asList(shiftLog, shiftLog1, shiftLog2,
+                                shiftLog3, shiftLog4, shiftLog5, shiftLog6, shiftLog7, shiftLog8));
+
+                        if (counter[0] == iterations - 1) {
+                            long endTime = Instant.now().getEpochSecond();
+                            System.out.println("[OBU Service] Time: " +
+                                    TimeUnit.SECONDS.toSeconds(endTime - startTime));
+                        } else {
+                            counter[0] = counter[0] + 1;
+                        }
+                        System.out.println("[Profiler Tests] Result for iteration #" + finalI);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        if (counter[0] == iterations - 1) {
+                            long endTime = Instant.now().getEpochSecond();
+                            System.out.println("[OBU Service] Time: " +
+                                    TimeUnit.SECONDS.toSeconds(endTime - startTime));
+                        } else {
+                            counter[0] = counter[0] + 1;
+                        }
+                        System.out.println("[Profiler Tests] Result for iteration #" + finalI);
+                    }
+                });
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
