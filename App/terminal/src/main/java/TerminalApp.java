@@ -1,6 +1,5 @@
-import exceptions.TerminalException;
 import services.TerminalService;
-import services.TestsService;
+import services.TerminalTestsService;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -27,7 +26,7 @@ public class TerminalApp {
         TerminalService terminalService = new TerminalService(host, port);
 
         try {
-            TestsService testsService = new TestsService();
+            TerminalTestsService testsService = new TerminalTestsService();
 
             List<List<String>> testCommands = testsService.getNextTestCommands();
             while(testCommands != null) {
@@ -64,8 +63,8 @@ public class TerminalApp {
                                     command.get(2)
                             );
                         }
-                    } catch(TerminalException e) {
-                        testsService.writeToOutputFile("[OBU Service Exception] " + e.getMessage());
+                    } catch(Exception e) {
+                        testsService.writeToOutputFile("[Terminal Service Exception] " + e.getMessage());
                     }
                 }
 
