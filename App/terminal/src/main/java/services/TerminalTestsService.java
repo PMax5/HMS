@@ -11,14 +11,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TestsService {
+public class TerminalTestsService {
 
     private static final String TESTS_INPUT_DIR = "tests/input";
     private static final String TESTS_OUTPUT_DIR = "tests/output/";
     private final List<Path> filePaths;
     private int currentTest;
 
-    public TestsService() throws IOException {
+    public TerminalTestsService() throws IOException {
         this.filePaths = Files.list(Paths.get(TESTS_INPUT_DIR)).collect(Collectors.toList());
         this.currentTest = 0;
     }
