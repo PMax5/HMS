@@ -11,5 +11,5 @@ data 90 30 40 1681730905
 data 85 20 35 1681730903
 data 85 20 35 1681730903
 datasubmit
-bulkendshift 10
+bulkendshift 300
 logout
