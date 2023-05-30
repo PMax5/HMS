@@ -1,8 +1,6 @@
 package services;
 
-import exceptions.TerminalException;
 import hmsProto.Auth;
-import hmsProto.Data;
 import hmsProto.GatewaysGrpc;
 import hmsProto.Profiler;
 import io.grpc.ManagedChannel;
@@ -25,7 +23,7 @@ public class TerminalService implements AutoCloseable {
         this.stub = GatewaysGrpc.newBlockingStub(this.channel);
     }
 
-    public void loginUser(String username, String password) throws TerminalException {
+    public void loginUser(String username, String password) throws Exception {
         Auth.UserAuthenticationRequest authenticationRequest = Auth.UserAuthenticationRequest.newBuilder()
                 .setUsername(username)
                 .setPassword(password)
@@ -34,7 +32,7 @@ public class TerminalService implements AutoCloseable {
         System.out.println("[Terminal Service] Logging in user: " + username);
         Auth.UserAuthenticationResponse authenticationResponse = this.stub.authenticateUser(authenticationRequest);
         if (authenticationResponse.hasErrorMessage()) {
-            throw new TerminalException(authenticationResponse.getErrorMessage().getDescription());
+            throw new Exception(authenticationResponse.getErrorMessage().getDescription());
         }
 
 
@@ -42,7 +40,7 @@ public class TerminalService implements AutoCloseable {
         this.username = username;
     }
 
-    public void logoutUser() throws TerminalException {
+    public void logoutUser() throws Exception {
         if (this.userToken == null) {
             return;
         }
@@ -54,7 +52,7 @@ public class TerminalService implements AutoCloseable {
         System.out.println("[Terminal Service] Logging out user: " + this.username);
         Auth.UserLogoutResponse logoutResponse = this.stub.logoutUser(logoutRequest);
         if (logoutResponse.hasErrorMessage()) {
-            throw new TerminalException(logoutResponse.getErrorMessage().getDescription());
+            throw new Exception(logoutResponse.getErrorMessage().getDescription());
         }
 
         this.userToken = null;
@@ -81,13 +79,14 @@ public class TerminalService implements AutoCloseable {
         Auth.UserRegistrationResponse userRegistrationResponse = this.stub.registerUser(userRegistrationRequest);
 
         if (userRegistrationResponse.hasErrorMessage()) {
-            throw new TerminalException(userRegistrationResponse.getErrorMessage().getDescription());
+            throw new Exception(userRegistrationResponse.getErrorMessage().getDescription());
         }
     }
 
     public void registerProfile(int minAge, int maxAge, String gender, int minHours, int maxHours,
                                 List<String> shiftTypes, List<Integer> routeIds,
-                                List<String> routeCharacteristics, int type) throws TerminalException {
+                                List<String> routeCharacteristics, int type) throws Exception {
+        System.out.println("[Terminal Service] Preparing new profile request.");
         Profiler.RegisterProfileRequest registerProfileRequest = Profiler.RegisterProfileRequest.newBuilder()
                 .setAgeRange(Profiler.Interval.newBuilder()
                         .setMin(minAge)
@@ -110,11 +109,11 @@ public class TerminalService implements AutoCloseable {
         Profiler.RegisterProfileResponse registerProfileResponse = this.stub.registerProfile(registerProfileRequest);
 
         if (registerProfileResponse.hasErrorMessage()) {
-            throw new TerminalException(registerProfileResponse.getErrorMessage().getDescription());
+            throw new Exception(registerProfileResponse.getErrorMessage().getDescription());
         }
     }
 
-    public void getProfiles() throws TerminalException {
+    public void getProfiles() throws Exception {
         Profiler.GetProfilesRequest getProfilesRequest = Profiler.GetProfilesRequest.newBuilder()
                 .setToken(this.userToken)
                 .build();
@@ -123,7 +122,7 @@ public class TerminalService implements AutoCloseable {
         Profiler.GetProfilesResponse getProfilesResponse = this.stub.getProfiles(getProfilesRequest);
 
         if (getProfilesResponse.hasErrorMessage()) {
-            throw new TerminalException(getProfilesResponse.getErrorMessage().getDescription());
+            throw new Exception(getProfilesResponse.getErrorMessage().getDescription());
         }
 
         getProfilesResponse.getProfilesList().forEach(p -> {
@@ -141,7 +140,7 @@ public class TerminalService implements AutoCloseable {
         });
     }
 
-    public void setUserProfile(String username, String profileId) throws TerminalException {
+    public void setUserProfile(String username, String profileId) throws Exception {
         Profiler.SetProfileRequest setProfileRequest = Profiler.SetProfileRequest.newBuilder()
                 .setUsername(username)
                 .setProfileId(profileId)
@@ -152,7 +151,7 @@ public class TerminalService implements AutoCloseable {
         Profiler.SetProfileResponse setProfileResponse = this.stub.setUserProfile(setProfileRequest);
 
         if (setProfileResponse.hasErrorMessage()) {
-            throw new TerminalException(setProfileResponse.getErrorMessage().getDescription());
+            throw new Exception(setProfileResponse.getErrorMessage().getDescription());
         }
     }
 
