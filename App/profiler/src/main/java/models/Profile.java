@@ -78,4 +78,11 @@ public class Profile {
     }
 
     public int getType() { return this.type; }
+
+    @Override
+    public String toString() {
+        return "=== PROFILE ===\n ID: " + this.getId() +
+                "\n Shift Types: " + this.getShiftTypes() +
+                "\n Route Characteristics: " + this.getRouteCharacteristics();
+    }
 }

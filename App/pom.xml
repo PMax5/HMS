@@ -47,6 +47,11 @@
             <artifactId>genson</artifactId>
             <version>1.6</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.22</version>
+        </dependency>
     </dependencies>
 
 </project>

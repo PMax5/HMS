@@ -69,12 +69,23 @@ public class RegistryService {
     public User registerUser(String username, String name, int age,
                              Gender gender, UserRole userRole, String hashedPassword) {
         try {
+            System.out.println("[Registry Service] Registering user:\n" +
+                    "Username: " + username +
+                    "\nName: " +  name +
+                    "\nAge: " + age +
+                    "\nGender: " + gender +
+                    "\nRole: " + userRole +
+                    "\nPassword: " + hashedPassword
+            );
+
             if (username.isEmpty() || name.isEmpty() || age < 18 || age > 100 || gender == null || userRole == null
                     || hashedPassword.isEmpty()) {
+                System.out.println("[Registry Service] Failed to register user with username: " + username + ". " +
+                        "Invalid data provided.");
                 return null;
             }
 
-            return this.hyperledgerService.registerUser(
+            User user = this.hyperledgerService.registerUser(
                     username,
                     name,
                     age,
@@ -82,6 +93,15 @@ public class RegistryService {
                     userRole,
                     hashedPassword
             );
+
+            if (user != null) {
+                System.out.println("[Registry Service] Successfully registered user with username: " + username);
+            } else {
+                System.out.println("[Registry Service] Failed to register user with username: " + username + ". " +
+                        "Invalid data provided.");
+            }
+
+            return user;
         } catch (IOException | ContractException | InterruptedException | TimeoutException e) {
             System.err.println("[Registry Service] Failed to register user: " + e.getMessage());
             return null;

@@ -169,8 +169,18 @@ public class ProfilerService {
             }
 
             this.hyperledgerService.setProfile(username, profileId);
-            System.out.println("[Profiler Service] User " + username + " profile was successfully revised to: " +
+            Profile newProfile = null;
+            for (Profile profile: this.profiles) {
+                if (profile.getId().equals(profileId)) {
+                    newProfile = profile;
+                }
+            }
+
+            System.out.println("[Profiler Service] User " + username + " profile was revised to profile with ID: " +
                     profileId);
+            if (newProfile != null) {
+                System.out.println(newProfile);
+            }
             return true;
         } catch (IOException | ContractException | InterruptedException | TimeoutException e) {
             System.err.println("[Profiler Service] Failed to set profile " + profileId + " for user " + username + ": "
@@ -295,9 +305,11 @@ public class ProfilerService {
 
             if (lastShiftLog != null) {
                 Profile userProfile = this.getUserProfile(username, profiles);
+                System.out.println("[Profiler Service] Analyzing profile for user " + username + " with \n"
+                        + userProfile);
                 if (userProfile != null) {
                     if (lastShiftLog.getAverageBPM() > this.config.getMaxHealthyBPM() &&
-                            problematicShiftsBPM.size() > this.config.getMaxProblematicShifts()) {
+                            problematicShiftsBPM.size() > 1) {
                         for (ShiftType shiftType: userProfile.getShiftTypes()) {
                             if (shiftType.equals(ShiftType.SHIFT_MORNING) ||
                                     shiftType.equals(ShiftType.SHIFT_AFTERNOON)) {
@@ -341,7 +353,7 @@ public class ProfilerService {
                             }
                         }
                     } else if (lastShiftLog.getAverageDrowsiness() > this.config.getMaxDrowsiness() &&
-                            problematicShiftsDrowsiness.size() > this.config.getMaxProblematicShifts()) {
+                            problematicShiftsDrowsiness.size() > 1) {
                         for (ShiftType shiftType: userProfile.getShiftTypes()) {
                             if (shiftType.equals(ShiftType.SHIFT_NIGHT)) {
                                 userProfile = this.getProfileForShiftType(profiles, ShiftType.SHIFT_MORNING);

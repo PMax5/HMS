@@ -136,6 +136,8 @@ public class OBUService implements AutoCloseable {
                 .setVehicleId(vehicleId)
                 .build();
 
+        System.out.println("[OBU Service] Starting shift for user: " + this.username + " in route " +
+                routeId + " and vehicle " + vehicleId);
         Data.StartShiftResponse startShiftResponse = this.blockingStub.startShift(startShiftRequest);
         if (startShiftResponse.hasErrorMessage()) {
             throw new OBUException(startShiftResponse.getErrorMessage().getDescription());
@@ -153,7 +155,7 @@ public class OBUService implements AutoCloseable {
                 .setUsername(this.username)
                 .build();
 
-        System.out.println("[OBU Service] Sending end shift request for user: " + this.username);
+        System.out.println("[OBU Service] Ending shift for user: " + this.username);
         Data.EndShiftResponse endShiftResponse = this.blockingStub.endShift(endShiftRequest);
         if (endShiftResponse.hasErrorMessage()) {
             throw new OBUException(endShiftResponse.getErrorMessage().getDescription());

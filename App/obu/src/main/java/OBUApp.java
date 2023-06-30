@@ -35,7 +35,7 @@ public class OBUApp {
             while(testCommands != null) {
                 testsService.createOutputFile();
                 for (List<String> command: testCommands) {
-                    System.out.println("[OBU Service] Running command: " + command);
+                  //  System.out.println("[OBU Service] Running command: " + command);
                     try {
                         switch (command.get(0)) {
                             case LOGIN_USER_COMMAND -> obuService.loginUser(command.get(1), command.get(2));
@@ -48,6 +48,12 @@ public class OBUApp {
                                 obuService.addDrowsiness(Integer.parseInt(command.get(2)));
                                 obuService.addSpeed(Integer.parseInt(command.get(3)));
                                 obuService.addTimestamp(Integer.parseInt(command.get(4)));
+                                System.out.println("[OBU Service] Storing collected values:\n" +
+                                        "BPM: " + command.get(1) +
+                                        "\nDrowsiness: " + command.get(2) + "%" +
+                                        "\nSpeed: " + command.get(3) + " Km/h" +
+                                        "\n Timestamp: " + command.get(4)
+                                );
                             }
                             case DATA_SUBMIT_COMMAND -> obuService.submitUserData();
                             case BULK_DATA_SUBMIT_COMMAND -> obuService.bulkSubmitUserData(

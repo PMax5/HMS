@@ -13,6 +13,9 @@ import models.Config;
 import models.Route;
 import org.bson.Document;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import static com.mongodb.client.model.Filters.eq;
 
 public class RoutesRepo {
@@ -22,6 +25,8 @@ public class RoutesRepo {
     public RoutesRepo(Config config) {
         this.databaseAddress = config != null ? config.getDatabaseAddress() :
                 System.getenv("CONFIG_DATABASE_ADDRESS");
+
+        Logger.getLogger("org.mongodb.driver").setLevel(Level.OFF);
     }
 
     private MongoDatabase newConnection() {
